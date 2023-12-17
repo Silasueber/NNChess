@@ -17,3 +17,7 @@
 # Step 1.2.c: create a Dataset with games from only one player (Magnus Carlsen, Ding Liren, ...)
 
 # Step 2: train a neural network to eval the positions
+
+
+# Databank of games
+# Mate in 1 for black: "8/8/8/8/8/6k1/2q5/6K1 w - - 0 1"
