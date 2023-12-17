@@ -43,7 +43,6 @@ def createDataEntry(whitesTurn):
         with open(csv_path, 'a', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(line.split(','))
-        print(f"Line added to {csv_path} successfully.")
     except Exception as e:
         print(f"Error: {e}")
 
@@ -111,15 +110,18 @@ def playGameLimitedMoves(moves):
         except:
             print("Couldnt make move")
             moves = 0
-    print(stockfish_white.get_board_visual())
+    #print(stockfish_white.get_board_visual())
 
 def createRandomFen(min_moves=10, max_moves=30):
     board = chess.Board()
     num_moves = random.randint(min_moves, max_moves)
     for i in range(num_moves):
-        legal_moves = [move for move in board.legal_moves]
-        random_move = random.choice(legal_moves)
-        board.push(random_move)
+        try:
+            legal_moves = [move for move in board.legal_moves]
+            random_move = random.choice(legal_moves)
+            board.push(random_move)
+        except: 
+            print("Couldnt make move")
     fen_position = board.fen()
     return fen_position
 
@@ -130,7 +132,7 @@ def setPosition(position):
 
 #playGame()
 amount_of_games = 100
-while amount_of_games > 0:
+for i in range(amount_of_games):
+    print("Current Game: " + str(i))
     setPosition(createRandomFen(min_moves=100, max_moves=200))
     playGameLimitedMoves(3)
-    amount_of_games -= 1
