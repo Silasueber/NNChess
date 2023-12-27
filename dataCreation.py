@@ -48,7 +48,7 @@ def createDataEntry(whitesTurn):
     except Exception as e:
         print(f"Error: {e}")
 
-    # Dataset two with [1,0] -> White winning [0,1] -> Black winning [1,1] -> Draw
+    # Dataset two with [1,0,0] -> White winning [0,1,0] -> Black winning [0,0,1] -> Draw
     csv_path = "data/p2.csv"
     eval = convertEvalIntoValue()
     winner = ""
