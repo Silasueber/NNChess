@@ -18,6 +18,7 @@
 
 # Step 2: train a neural network to eval the positions
 
+#Step 3: Reinformcement learning
 
 # Databank of games
 # Mate in 1 for black: "8/8/8/8/8/6k1/2q5/6K1 w - - 0 1"
