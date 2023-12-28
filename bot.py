@@ -24,7 +24,7 @@ model = nn.Sequential(
     nn.Linear(16, 3),
     nn.Sigmoid())
 
-loss_fn = nn.BCELoss()  # binary cross entropy
+loss_fn = nn.CrossEntropyLoss()  # cross entropy
 optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
 
 batch_size = 100
