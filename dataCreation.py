@@ -1,18 +1,11 @@
 import chess
 import csv
 import random
-import platform
-from stockfish import Stockfish
+from stockfishHelper import initalizeStockfish
 
 # Init Stockfish parameters
-if platform.system() == 'Windows':
-    stockfish_white = Stockfish(
-        path="C:\\Uni\\Siena_Studium\\Neural Nets\\projects\\stockfish-windows-x86-64-avx2\\stockfish\\stockfish-windows-x86-64-avx2.exe")
-    stockfish_black = Stockfish(
-        path="C:\\Uni\\Siena_Studium\\Neural Nets\\projects\\stockfish-windows-x86-64-avx2\\stockfish\\stockfish-windows-x86-64-avx2.exe")
-else:
-    stockfish_white = Stockfish()
-    stockfish_black = Stockfish()
+stockfish_white = initalizeStockfish()
+stockfish_black = initalizeStockfish()
 
 stockfish_white.set_elo_rating(1000)
 # stockfish_black.set_elo_rating(1350)

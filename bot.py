@@ -2,8 +2,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from stockfish import Stockfish
 from torch.utils.data import TensorDataset, DataLoader
+from stockfishHelper import initalizeStockfish
+
+
 # load the dataset, split into input (X) and output (y) variables
 # BE CAREFUL the split must be changed if we use a different representation of who is winning cpawn vs, [1,0] 
 dataset = np.loadtxt('data/p2.csv', delimiter=',')
@@ -32,8 +34,8 @@ dataset = TensorDataset(X, y)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 
-n_epochs = 2000
-if False:
+n_epochs = 20
+if True:
     for epoch in range(n_epochs):
         for Xbatch, ybatch in dataloader:
             y_pred = model(Xbatch)
@@ -54,7 +56,7 @@ whiteWinning = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 blackWinning = "5kq1/8/8/8/8/8/5K2/8 w - - 0 1"
 
 def convertPositionToString(fen):
-    stock = Stockfish()
+    stock = initalizeStockfish()
     stock.set_fen_position(fen)
     board = stock.get_board_visual()
 
