@@ -6,36 +6,37 @@ from stockfish import Stockfish
 from torch.utils.data import TensorDataset, DataLoader
 # load the dataset, split into input (X) and output (y) variables
 # BE CAREFUL the split must be changed if we use a different representation of who is winning cpawn vs, [1,0] 
-dataset = np.loadtxt('data/p2.csv', delimiter=',')
-X = dataset[:, :65]
-y = dataset[:, 65:]
-# Convert to tensors
-X = torch.tensor(X, dtype=torch.float32)
-y = torch.tensor(y, dtype=torch.float32)
 
-# define model
-model = nn.Sequential(
-    nn.Linear(65, 32),
-    nn.ReLU(),
-    nn.Linear(32, 32),
-    nn.ReLU(),
-    nn.Linear(32, 16),
-    nn.ReLU(),
-    nn.Linear(16, 3),
-    nn.Sigmoid())
+train = False
+if train:
+    dataset = np.loadtxt('data/p2.csv', delimiter=',')
+    X = dataset[:, :65]
+    y = dataset[:, 65:]
+    # Convert to tensors
+    X = torch.tensor(X, dtype=torch.float32)
+    y = torch.tensor(y, dtype=torch.float32)
 
-loss_fn = nn.CrossEntropyLoss()  # cross entropy
-optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
+    # define model
+    model = nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 3),
+        nn.Sigmoid())
 
-batch_size = 100
-dataset = TensorDataset(X, y)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # load model: model = torch.load("models/p2.pt")
 
+    loss_fn = nn.CrossEntropyLoss()  # cross entropy
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
 
-# LOAD OLD MODEL AND TRAIN ON IT
-model = torch.load("models/p2.pt")
-n_epochs = 2000
-if True:
+    batch_size = 100
+    dataset = TensorDataset(X, y)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    n_epochs = 2000 
     for epoch in range(n_epochs):
         for Xbatch, ybatch in dataloader:
             y_pred = model(Xbatch)
@@ -48,9 +49,11 @@ if True:
         print(f'Finished epoch {epoch}, latest loss {loss}')
 
     torch.save(model, "models/p2.pt")
-model = torch.load("models/p2.pt")
-model.eval()
-
+    model = torch.load("models/p2.pt")
+    model.eval()
+else:
+    # LOAD OLD MODEL AND TRAIN ON IT
+    model = torch.load("models/p2.pt")
 
 whiteWinning = "4k3/8/2n5/8/8/5QK1/8/8 w - - 0 1"
 blackWinning = "3qkr2/8/2n5/8/8/5QK1/8/8 b - - 0 1"
