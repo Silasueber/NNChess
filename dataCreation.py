@@ -140,10 +140,13 @@ def playGameLimitedMoves(moves):
         # os.system('clear')
         # print(stockfish_white.get_board_visual())
         try:
+            # PLAY BEST MOVE
+
             createDataEntry(whitesTurn=True)
             playMove(stockfish_white.get_best_move_time(100))
             createDataEntry(whitesTurn=False)
             playMove(stockfish_black.get_best_move_time(100))
+
             moves -= 1
         except Exception as e:
             print(e)
@@ -170,8 +173,8 @@ def setPosition(position):
 
 
 #playGame()
-amount_of_games = 100
+amount_of_games = 10000
 for i in range(amount_of_games):
     print("Current Game: " + str(i))
     setPosition(createRandomFen(min_moves=0, max_moves=200))
-    playGameLimitedMoves(100)
+    playGameLimitedMoves(10)

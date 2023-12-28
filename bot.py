@@ -32,8 +32,10 @@ dataset = TensorDataset(X, y)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 
+# LOAD OLD MODEL AND TRAIN ON IT
+model = torch.load("models/p2.pt")
 n_epochs = 2000
-if False:
+if True:
     for epoch in range(n_epochs):
         for Xbatch, ybatch in dataloader:
             y_pred = model(Xbatch)
@@ -50,8 +52,8 @@ model = torch.load("models/p2.pt")
 model.eval()
 
 
-whiteWinning = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-blackWinning = "5kq1/8/8/8/8/8/5K2/8 w - - 0 1"
+whiteWinning = "4k3/8/2n5/8/8/5QK1/8/8 w - - 0 1"
+blackWinning = "3qkr2/8/2n5/8/8/5QK1/8/8 b - - 0 1"
 
 def convertPositionToString(fen):
     stock = Stockfish()
