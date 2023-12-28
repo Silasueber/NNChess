@@ -172,9 +172,12 @@ def setPosition(position):
     stockfish_white.set_fen_position(position)
 
 
-#playGame()
-amount_of_games = 10000
-for i in range(amount_of_games):
-    print("Current Game: " + str(i))
-    setPosition(createRandomFen(min_moves=0, max_moves=200))
-    playGameLimitedMoves(10)
+if __name__ == "__main__":
+    amount_of_games = int(input("Amount of Games: "))
+    min_moves = int(input("Minimum Moves to generate random Position: "))
+    max_moves = int(input("Maximum Moves to generate random Position: "))
+    moves_to_play = int(input("Moves per Position to play: "))
+    for i in range(amount_of_games):
+        print("Current Game: " + str(i+1))
+        setPosition(createRandomFen(min_moves=min_moves, max_moves=max_moves))
+        playGameLimitedMoves(moves_to_play)
