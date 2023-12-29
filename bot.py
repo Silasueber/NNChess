@@ -28,7 +28,6 @@ def transformSingleBoardToOneHot(board):
 
     return newBoardRepresentation
 def transformBoardsCsvToOneHot(boards):
-
     newBoardsRepresentation = np.array([])
     for board in boards:
         newBoardRepresentation = transformSingleBoardToOneHot(board)
