@@ -22,19 +22,19 @@ one_hot_mapping = {
     -1000: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]  # Black King
 }
 def transformSingleBoardToOneHot(board):
+    newBoardRepresentation = np.array([board[0]]) # First entry is whos turn it is
     for field in board[1:]:
         newBoardRepresentation = np.append(newBoardRepresentation, one_hot_mapping[field])
+
+    return newBoardRepresentation
 def transformBoardsCsvToOneHot(boards):
 
     newBoardsRepresentation = np.array([])
     for board in boards:
-        newBoardRepresentation = np.array([board[0]]) #dont wanna touch whos turn it is
-        for field in board[1:]:
-            newBoardRepresentation = np.append(newBoardRepresentation, one_hot_mapping[field])
-
+        newBoardRepresentation = transformSingleBoardToOneHot(board)
         newBoardsRepresentation = np.append(newBoardsRepresentation, newBoardRepresentation)
 
-    newBoardsRepresentation = newBoardsRepresentation.reshape(len(boards), 641) #641 = 1+64*10
+    newBoardsRepresentation = newBoardsRepresentation.reshape(len(boards), 641) #641 = 1+64*10 because one hot vector has 10 elements
     return newBoardsRepresentation
 
 train = True
