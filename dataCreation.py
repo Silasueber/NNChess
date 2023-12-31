@@ -1,12 +1,12 @@
 import chess
 import csv
 import random
-from stockfish import Stockfish
+from stockfishHelper import initalizeStockfish
 
 # Init Stockfish parameters
-stockfish_white = Stockfish()
+stockfish_white = initalizeStockfish()
+stockfish_black = initalizeStockfish()
 #stockfish_white.set_elo_rating(1000)
-stockfish_black = Stockfish()
 # stockfish_black.set_elo_rating(1350)
 
 # Play moves
@@ -46,9 +46,8 @@ def createDataEntry(whitesTurn):
     except Exception as e:
         print(f"Error: {e}")
 
-    # Dataset two with [1,0] -> White winning [0,1] -> Black winning [1,1] -> Draw
+    # Dataset two with [1,0,0] -> White winning [0,1,0] -> Black winning [0,0,1] -> Draw
     csv_path = "data/p2.csv"
-    eval = convertEvalIntoValue()
     winner = ""
     if eval == 1:
         winner = "1,0,0"

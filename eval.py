@@ -1,22 +1,20 @@
-import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
 from stockfish import Stockfish
-from torch.utils.data import TensorDataset, DataLoader
 import chess
+from stockfishHelper import initializeStockfish
+
 # Load Model 
 model = torch.load("models/p2.pt")
 
 # Init Stockfish
-stockfish = Stockfish()
+stockfish = initializeStockfish()
 
 # Init Chess
 board = chess.Board()
 
 
 def convertPositionToString(fen):
-    stock = Stockfish()
+    stock = initializeStockfish()
     stock.set_fen_position(fen)
     board = stock.get_board_visual()
 
