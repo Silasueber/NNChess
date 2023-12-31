@@ -2,7 +2,7 @@
 
 # Step 0.a: every piece is represented by a number of its value [Pawn 1, Knight 3, ...]
 # Step 0.b: every piece is represented by an one-hot-encoding [Pawn [1,0,0,0,0,0], Knight [0,1,0,0,0,0]]
-# Step 0.c: how do we represent which players turn it is? With an extry neuron?
+# Step 0.c: how do we represent which players turn it is? With an extra neuron?
 
 # Step 1: create a Dataset
 
