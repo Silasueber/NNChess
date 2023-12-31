@@ -22,3 +22,10 @@
 
 # Databank of games
 # Mate in 1 for black: "8/8/8/8/8/6k1/2q5/6K1 w - - 0 1"
+
+# Games that get played "correctly"
+# p3_2_1_night.pt 8/2k5/6K1/8/8/4Q3/3R4/8 w - - 0 1 Mate in 3
+# 10000_chess.pt 6r1/5n2/8/2K5/7k/8/4Q3/8 w - - 0 1 Long but nice game (still huge blunders)
+
+# IDEA 
+# Create new dataset where there is also a node for checks

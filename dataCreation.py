@@ -6,11 +6,8 @@ from stockfishHelper import initalizeStockfish
 # Init Stockfish parameters
 stockfish_white = initalizeStockfish()
 stockfish_black = initalizeStockfish()
-
-stockfish_white.set_elo_rating(1000)
+#stockfish_white.set_elo_rating(1000)
 # stockfish_black.set_elo_rating(1350)
-
-
 
 # Play moves
 def playMove(move):
@@ -68,7 +65,7 @@ def createDataEntry(whitesTurn):
         print(f"Error: {e}")
 
     # Dataset three with cpawn value for position [limited at -10 and +10]
-    csv_path = "data/p3.csv"
+    csv_path = "data/p3_2.csv"
     winner = getCpawnValue()
     line = turn+position+","+str(winner)
     try:
@@ -106,16 +103,20 @@ def getCpawnValue():
     # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
     eval = stockfish_black.get_evaluation()
     eval_type = eval.get('type')
-    eval_value = eval.get("value")
+    eval_value = round((eval.get("value") + 700)/1400*0.8+0.1,4)
+    
+    if eval_value > 0.9:
+        eval_value = 0.9
+    if eval_value < 0.1:
+        eval_value = 0.1
     if eval_type == "mate":
-        if eval_value > 0: 
-            return 10000-(eval_value*1000)
+        if eval.get('value') > 0: 
+            return round(0.9+(0.1/eval.get("value")),4)
         else: 
             # Winning Black
-            return -10000+(eval_value*1000)
+            return round(0.1-(0.1/(-eval.get("value"))),4)
     else:
         return eval_value
-   
 
 def playGame():
     while stockfish_white.get_best_move():
@@ -139,11 +140,16 @@ def playGameLimitedMoves(moves):
         # playMove(stockfish_black.get_best_move())
         # os.system('clear')
         # print(stockfish_white.get_board_visual())
+        
+        # if getCpawnValue() == 0.5: break # Dont flood Database with dead draws
         try:
+            # PLAY BEST MOVE
+
             createDataEntry(whitesTurn=True)
             playMove(stockfish_white.get_best_move_time(100))
             createDataEntry(whitesTurn=False)
             playMove(stockfish_black.get_best_move_time(100))
+
             moves -= 1
         except Exception as e:
             print(e)
@@ -166,12 +172,26 @@ def createRandomFen(min_moves=10, max_moves=30):
 
 def setPosition(position):
     stockfish_black.set_fen_position(position)
+    print(stockfish_black.get_board_visual())
     stockfish_white.set_fen_position(position)
 
 
-#playGame()
-amount_of_games = 100
-for i in range(amount_of_games):
-    print("Current Game: " + str(i))
-    setPosition(createRandomFen(min_moves=0, max_moves=200))
-    playGameLimitedMoves(100)
+if __name__ == "__main__":
+    amount_of_games = int(input("Amount of Games: "))
+    custom_position = input("Costum Position (if null random fen gets generated): ")
+    if not stockfish_black.is_fen_valid(custom_position):
+        print("Invalid Fen position")
+        min_moves = int(input("Minimum Moves to generate random Position: "))
+        max_moves = int(input("Maximum Moves to generate random Position: "))
+        moves_to_play = int(input("Moves per Position to play: "))
+        for i in range(amount_of_games):
+            print("Current Game: " + str(i+1))
+            setPosition(createRandomFen(min_moves=min_moves, max_moves=max_moves))
+            playGameLimitedMoves(moves_to_play)
+    else: 
+        moves_to_play = int(input("Moves per Position to play: "))
+        for i in range(amount_of_games):
+            print("Current Game: " + str(i+1))
+            setPosition(custom_position)
+            playGameLimitedMoves(moves_to_play)
+
