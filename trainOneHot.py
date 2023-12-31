@@ -3,32 +3,63 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import chess
-import time
+import os.path as path
 from torch.utils.data import TensorDataset, DataLoader
 # load the dataset, split into input (X) and output (y) variables
 # BE CAREFUL the split must be changed if we use a different representation of who is winning cpawn vs, [1,0] 
+one_hot_mapping = {
+    0: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Empty
+    1: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # White Pawn
+    3: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],  # White Knight/Bishop
+    5: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],  # White Rook
+    10: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],  # White Queen
+    1000: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],  # White King
+    -1: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  # Black Pawn
+    -3: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],  # Black Knight/Bishop
+    -5: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],  # Black Rook
+    -10: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],  # Black Queen
+    -1000: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]  # Black King
+}
+def transformSingleBoardToOneHot(board):
+    newBoardRepresentation = np.array([board[0]]) # First entry is whose turn it is
+    for field in board[1:]:
+        newBoardRepresentation = np.append(newBoardRepresentation, one_hot_mapping[field])
 
-train = False
+    return newBoardRepresentation
+def transformBoardsCsvToOneHot(boards):
+    newBoardsRepresentation = np.array([])
+    for board in boards:
+        newBoardRepresentation = transformSingleBoardToOneHot(board)
+        newBoardsRepresentation = np.append(newBoardsRepresentation, newBoardRepresentation)
+
+    newBoardsRepresentation = newBoardsRepresentation.reshape(len(boards), 641) #641 = 1+64*10 because one hot vector has 10 elements
+    return newBoardsRepresentation
+
+train = True
+modelName = "models/one_hot.pt"
 if train:
-    dataset = np.loadtxt('data/p3_2.csv', delimiter=',')
+    dataset = np.loadtxt('data/p2.csv', delimiter=',') # use same dataset because no reason to change
     X = dataset[:, :65]
     y = dataset[:, 65:]
+    X = transformBoardsCsvToOneHot(X)
     # Convert to tensors
     X = torch.tensor(X, dtype=torch.float32)
     y = torch.tensor(y, dtype=torch.float32)
 
     # define model
+    noOfCpawnValues = 5
     model = nn.Sequential(
-        nn.Linear(65, 512),
+        nn.Linear(1 + 64 * noOfCpawnValues * 2, 512),
         nn.ReLU(),
         nn.Linear(512, 32),
         nn.ReLU(),
         nn.Linear(32, 32),
         nn.ReLU(),
-        nn.Linear(32, 1))
+        nn.Linear(32, 3))
 
-    # load model: 
-    model = torch.load("models/018_loss.pt")
+    # load model:
+    if path.isfile(modelName):
+        model = torch.load(modelName)
 
     loss_fn = nn.MSELoss()  # BECAUSE ALL LABELS ARE EITHER 0 OR 1
     optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
@@ -52,11 +83,11 @@ if train:
         # Print loss after each epoch
         print(f'Finished epoch {epoch}, latest loss {str(avg_loss/amount)}')
 
-    torch.save(model, "models/3_layer_4.pt")
-    model = torch.load("models/3_layer_4.pt")
+    torch.save(model, modelName)
+    model = torch.load(modelName)
     model.eval()
 else:
-    model = torch.load("models/3_layer_4.pt")
+    model = torch.load(modelName)
 
 whiteWinning = "3k4/8/3K4/8/8/8/8/Q7 w - - 0 2"
 blackWinning = "8/2k5/8/2q5/8/8/7R/7K w - - 0 1"
@@ -82,6 +113,7 @@ def convertPositionToString(fen):
 def testFenPosition(fen):
     test = ("1,"+ convertPositionToString(fen)).split(",")
     test = [int(t) for t in test]
+    test = transformSingleBoardToOneHot(test)
     test = torch.tensor(test, dtype=torch.float32)
     predictions = model(test)
     print(predictions)
