@@ -36,15 +36,18 @@ def transformBoardsCsvToOneHot(boards):
     return newBoardsRepresentation
 
 train = True
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 modelName = "models/one_hot.pt"
 if train:
-    dataset = np.loadtxt('data/p2.csv', delimiter=',') # use same dataset because no reason to change
+    print('Using device:', device)
+    dataset = np.loadtxt('data/p2_small.csv' if device.type == 'cpu' else 'data/p2.csv', delimiter=',') # use same dataset because no reason to change
     X = dataset[:, :65]
     y = dataset[:, 65:]
     X = transformBoardsCsvToOneHot(X)
     # Convert to tensors
     X = torch.tensor(X, dtype=torch.float32)
-    y = torch.tensor(y, dtype=torch.float32)
+    y_one_hot = torch.tensor(y, dtype=torch.float32)
+    y_class_indices = torch.argmax(y_one_hot, dim=1) #pytorch needs integer values for nn.CrossEntropyLoss
 
     # define model
     noOfCpawnValues = 5
@@ -61,11 +64,12 @@ if train:
     if path.isfile(modelName):
         model = torch.load(modelName)
 
-    loss_fn = nn.MSELoss()  # BECAUSE ALL LABELS ARE EITHER 0 OR 1
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
+    model = model.to(device)
 
-    batch_size = 10
-    dataset = TensorDataset(X, y)
+    loss_fn = nn.CrossEntropyLoss() # TODO still not sure? habs auch nochmal gegoogelt
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
+    batch_size = 100
+    dataset = TensorDataset(X, y_class_indices)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     n_epochs = 2000
@@ -73,6 +77,7 @@ if train:
         avg_loss = 0
         amount = 0
         for Xbatch, ybatch in dataloader:
+            Xbatch, ybatch = Xbatch.to(device), ybatch.to(device)
             y_pred = model(Xbatch)
             loss = loss_fn(y_pred, ybatch)
             avg_loss += loss.item()
@@ -87,7 +92,7 @@ if train:
     model = torch.load(modelName)
     model.eval()
 else:
-    model = torch.load(modelName)
+    model = torch.load(modelName, map_location=device)
 
 whiteWinning = "3k4/8/3K4/8/8/8/8/Q7 w - - 0 2"
 blackWinning = "8/2k5/8/2q5/8/8/7R/7K w - - 0 1"
@@ -118,5 +123,6 @@ def testFenPosition(fen):
     predictions = model(test)
     print(predictions)
 
-testFenPosition(whiteWinning)
-testFenPosition(blackWinning)
+with torch.no_grad(): # uses less memory, random optimization when doing inference
+    testFenPosition(whiteWinning)
+    testFenPosition(blackWinning)
