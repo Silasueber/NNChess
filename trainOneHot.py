@@ -36,7 +36,7 @@ def transformBoardsCsvToOneHot(boards):
     return newBoardsRepresentation
 
 train = True
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 modelName = "models/one_hot.pt"
 if train:
     print('Using device:', device)
@@ -120,6 +120,7 @@ def testFenPosition(fen):
     test = [int(t) for t in test]
     test = transformSingleBoardToOneHot(test)
     test = torch.tensor(test, dtype=torch.float32)
+    test.to(device)
     predictions = model(test)
     print(predictions)
 
