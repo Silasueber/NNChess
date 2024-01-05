@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 
 
-dataset = np.loadtxt('data/p3_2.csv', delimiter=',')
+dataset = np.loadtxt('eval/p3_2.csv', delimiter=',')
 X = dataset[:, :65]
 y = dataset[:, 65:]
 # Convert to tensors
