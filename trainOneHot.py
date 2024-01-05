@@ -20,6 +20,10 @@ one_hot_mapping = {
     -10: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],  # Black Queen
     -1000: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]  # Black King
 }
+
+train = True
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+modelName = "models/one_hot.pt"
 def transformSingleBoardToOneHot(board):
     newBoardRepresentation = np.array([board[0]]) # First entry is whose turn it is
     for field in board[1:]:
@@ -27,17 +31,21 @@ def transformSingleBoardToOneHot(board):
 
     return newBoardRepresentation
 def transformBoardsCsvToOneHot(boards):
+    oneHotEncodedValuesFileName = "data/p2_one_hot_encoded.npy"
+    if path.isfile(oneHotEncodedValuesFileName):
+        with open(oneHotEncodedValuesFileName, 'rb') as f:
+            return np.load(f)
     newBoardsRepresentation = np.array([])
     for board in boards:
         newBoardRepresentation = transformSingleBoardToOneHot(board)
         newBoardsRepresentation = np.append(newBoardsRepresentation, newBoardRepresentation)
 
     newBoardsRepresentation = newBoardsRepresentation.reshape(len(boards), 641) #641 = 1+64*10 because one hot vector has 10 elements
+    with open(oneHotEncodedValuesFileName, "wb") as f:
+        np.save(f, newBoardsRepresentation)
     return newBoardsRepresentation
 
-train = True
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-modelName = "models/one_hot.pt"
+
 if train:
     print('Using device:', device)
     dataset = np.loadtxt('data/p2_small.csv' if device.type == 'cpu' else 'data/p2.csv', delimiter=',') # use same dataset because no reason to change
@@ -62,7 +70,7 @@ if train:
 
     # load model:
     if path.isfile(modelName):
-        model = torch.load(modelName)
+        model = torch.load(modelName, map_location=device)
 
     model = model.to(device)
 
