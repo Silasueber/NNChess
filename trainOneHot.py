@@ -20,10 +20,10 @@ one_hot_mapping = {
     -10: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],  # Black Queen
     -1000: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]  # Black King
 }
-
 train = True
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 modelName = "models/one_hot.pt"
+
 def transformSingleBoardToOneHot(board):
     newBoardRepresentation = np.array([board[0]]) # First entry is whose turn it is
     for field in board[1:]:
@@ -100,7 +100,7 @@ if train:
     model = torch.load(modelName)
     model.eval()
 else:
-    model = torch.load(modelName)
+    model = torch.load(modelName, map_location=device)
 
 whiteWinning = "3k4/8/3K4/8/8/8/8/Q7 w - - 0 2"
 blackWinning = "8/2k5/8/2q5/8/8/7R/7K w - - 0 1"
