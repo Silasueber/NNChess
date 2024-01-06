@@ -6,7 +6,7 @@ General/Terminology:
         --> Take some action
         --> Environment decides if action was good/bad
         --> Learn which actions are (un)desirable
-    - Markov Decision Process (MDP) consists of 5 parts:
+    - Markov Decision Process (MDP) used in RL consists of 5 parts:
         - Agent (our chess bot) --> Plays against environment
         - Environment that we interact with --> Chess board and its rules to move and our goal (win?)
         - Current state of the world --> Chess board
@@ -29,12 +29,35 @@ General/Terminology:
                 - Play safe and dont want to get negative reward
         - Value --> Expected return
             - Given a state, what return can we expect on average?
-            - State value: If we apply strategy x to this state, what return can we expect?
+            - State value (V-Value): If we apply policy x to this state, what return can we expect?
             - State Action Value (Q-Value): Taking a random action and then follow the policy. What return can we expect?
-
+            - Optimal policy is the one that has highest value
+                --> This is the problem we re solving with RL. So we want to find the policy that gives us the most rewards.
+    - Prediction vs control models
+        - Prediction is given a policy, give the value function
+            --> Can produce exact outcome of every state and action interaction.
+            --> Concerning chess that would be also integrating strategies into the agent from the beginning
+        - Control is finding the best policy
+            --> Concerning chess this means it just tries random stuff and see how it works basically
+    - Bellman Equation for Return
+        - Always have immediate return + discounted return from action thereafter
+        - Can be calculated for state value and state action value
+    - How to update estimated State Action Value (one way, called TD):
+        --> Error = Observed reward - + return from next state - Return from current state
+        --> Error = R1 + yQ(S_3, a_3) - Q(S_1, a_1)
+            - R_1 is reward for first action, S_3 is state 3, a_3 is action 3
+    - Flow to update is
+        - Start with empty initial state (0 value for each state/action-pair)
+        - Agent takes action from current state, use epsilon-greedy for value-based
+        - Agent gets new state data after opponent also moved a piece
+        - Update estimates using observed reward to get more accurate estimates
+    - Exploration vs Exploitation
+        - Exploration --> Model tries different actions and observes rewards
+        - Exploitation --> Model is trained and can pick action that yields best return
     - Q-Function --> Function to maximize (reward function)
         - Need to add mechanism to encourage exploration
             - Epsilon Greedy
+                --> More exploration in earlier stages of training, more exploitation in later stages of training
             - Boltzmann Exploration
         - When our action has impact on the state of the game (as in chess) we have to take that into consideration.
           We then have an immediate reward and a reward we expect for later moves
@@ -45,12 +68,17 @@ General/Terminology:
 
 Application to chess:
     - To maximize: Stockfish evaluation of position after x turns
+        --> Goal is to get best position after x turns, which could be evaluated by stockfish then
     - Try to "survive" x turns against y elo?
     - Reduced scope: Only from starting board
     - Possible reward functions
         --> Get positive or neutral cpawn value within next two turns+
         --> Maximize stockfish evaluation to win (or not to lose?)
-
+        --> Win/lose
+    - Prediction vs Control
+        - Prediction --> Assess strength of position
+        - Control --> Find Optimal strategy to get most rewards. So we want to find a strategy to win the game most likely
+            --> Find optimal policy "policy-based" (idk what that means yet) or state based (can use greedy-epsilon)
 Caveats:
     - Might need to limit number of turns
 
@@ -59,6 +87,11 @@ Hyperparamters
         - Discount value (y)
     - Policy
     - Starting position of board
+    - Improve estimates
+        - Frequency - number of steps before update (episode, one step, n step)
+            --> Episode might not be suitable as it might take long to finish a game (we could limit turns though)
+        - Depth - number of backwards steps to propagate update (episode, one step, n step)
+        - Formula that is used to compute updated estimate (TD error ie)
 
 
 
@@ -67,3 +100,4 @@ Resources used:
     - https://blog.insightdatascience.com/reinforcement-learning-from-scratch-819b65f074d8
     - https://towardsdatascience.com/reinforcement-learning-made-simple-part-1-intro-to-basic-concepts-and-terminology-1d2a87aa060
         This has 6 part, atleast in intro has Chess as example to use RL
+    - https://arxiv.org/pdf/1712.01815.pdf (noch nicht angeschaut 06.01.24)
