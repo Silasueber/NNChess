@@ -1,0 +1,69 @@
+How could we use reinforcemeant learning?
+
+General/Terminology:
+    - State and actions are input to NN, rewards and best actions are output
+    - Learn by trial/error with environment to achieve a high score on a reward function
+        --> Take some action
+        --> Environment decides if action was good/bad
+        --> Learn which actions are (un)desirable
+    - Markov Decision Process (MDP) consists of 5 parts:
+        - Agent (our chess bot) --> Plays against environment
+        - Environment that we interact with --> Chess board and its rules to move and our goal (win?)
+        - Current state of the world --> Chess board
+            --> Maybe we need to consider the history of how we got there (not neccessarily though)
+        - Action we can take --> Legal moves for all pieces
+        - Reward --> Agent receives this to decide if action is good or bad
+            --> Agent tries to maximize rewards throughout game
+                --> We can give reward after each action or after an episode (batch/game)
+            --> Shouldnt focus on immediate reward only but also on subsequent values
+    - How does agent pick action?
+        - Return --> Total reward over all time steps (we favor total rewards rather than individual rewards)
+            - Discounted Rewards: We have a factor y = [0,1] which we apply to rewards that are after our
+                currently considered action. (r₀ is current action and r₁ the next move ...)
+                --> Return = r₀ +γ r₁ + γ² r₂
+        - Policy --> Strategy followed to pick an action
+            - Possibilities:
+                - Random action
+                - Action that has highest known reward for state(evaluation from stockfish?)
+                - Force exploration of new path
+                - Play safe and dont want to get negative reward
+        - Value --> Expected return
+            - Given a state, what return can we expect on average?
+            - State value: If we apply strategy x to this state, what return can we expect?
+            - State Action Value (Q-Value): Taking a random action and then follow the policy. What return can we expect?
+
+    - Q-Function --> Function to maximize (reward function)
+        - Need to add mechanism to encourage exploration
+            - Epsilon Greedy
+            - Boltzmann Exploration
+        - When our action has impact on the state of the game (as in chess) we have to take that into consideration.
+          We then have an immediate reward and a reward we expect for later moves
+            - This requires Temporal Difference Learning --> Looks into the future (similar to minimax with depth?)
+        - Another approach is Monte Carlo --> Playing entire game before we update anything
+            --> Advantages: Efficient propagation in batch than after each move
+        - Can have discrete vs continuous problem (chess is discrete cuz "limited" number of states and moves)
+
+Application to chess:
+    - To maximize: Stockfish evaluation of position after x turns
+    - Try to "survive" x turns against y elo?
+    - Reduced scope: Only from starting board
+    - Possible reward functions
+        --> Get positive or neutral cpawn value within next two turns+
+        --> Maximize stockfish evaluation to win (or not to lose?)
+
+Caveats:
+    - Might need to limit number of turns
+
+Hyperparamters
+    - Reward function
+        - Discount value (y)
+    - Policy
+    - Starting position of board
+
+
+
+
+Resources used:
+    - https://blog.insightdatascience.com/reinforcement-learning-from-scratch-819b65f074d8
+    - https://towardsdatascience.com/reinforcement-learning-made-simple-part-1-intro-to-basic-concepts-and-terminology-1d2a87aa060
+        This has 6 part, atleast in intro has Chess as example to use RL
