@@ -65,6 +65,33 @@ General/Terminology:
         - Another approach is Monte Carlo --> Playing entire game before we update anything
             --> Advantages: Efficient propagation in batch than after each move
         - Can have discrete vs continuous problem (chess is discrete cuz "limited" number of states and moves)
+    - Deep Q Network (DQN)
+        - Architecture
+            - Has two neural nets:
+                - Q Network --> This is our agent we train for optimal state action value
+                    - "Standard NN" an can be RNN if state is text (which would be the case)
+                - Target --> Identical to Q network
+            - Experience Replay: Interacts with env to generate data to train Q network
+        - Workflow:
+            1. Exp Replay selects & performs random action from current state, gets reward and new state
+                --> saves this as training sample (current state, action, reward, new state)
+            2. Q Network predicts Q-value
+                --> All prior Exp Replay observations are training data
+                --> We take batch from this (mix of old&new data)
+                --> Q-Network takes state and action from each sample and predicts Q value for each eaction (Predicted Q Value)
+                --> Target net takes next state and predicts best Q value out of all actions that can be taken (Target Q Value)
+                    --> Next state is from the same example that we feed into Q net but "next state" attribute
+            3. Compute loss and train net
+                - Predicted Q Value, Target Q Value and observed reward is used to compute loss
+                    to train Q network, target network is not trained
+        - Why need Experience Replay?
+            - So we can have shuffled training data
+                --> If we used 5 moves that were done in a row we only train on that part of the game
+                    --> Weights are updated just using this sequence
+       - Why need second net (target net)?
+            - Ensures target q values remain stable for a short period
+            - After some steps the learned weights from q network are copied to target net
+
 
 Application to chess:
     - To maximize: Stockfish evaluation of position after x turns
@@ -79,9 +106,22 @@ Application to chess:
         - Prediction --> Assess strength of position
         - Control --> Find Optimal strategy to get most rewards. So we want to find a strategy to win the game most likely
             --> Find optimal policy "policy-based" (idk what that means yet) or state based (can use greedy-epsilon)
+
+    -Q Function
+        - Actions are all moves that could possibly be done
+            - Maybe limit these? only pawns and queen ie
+        - States are all states that could possibly be arranged (oof)
+            - Limit for possiblites after first 5 turns ie
+    - Enemy for beginning might not be stockfish but making random moves maybe?
+        - Otherwise we wouldnt get rewards for the actions we do because we always lose?
+
 Caveats:
     - Might need to limit number of turns
-
+    - Only one player side (white ie)
+    - Actions we can do vary for each state
+    - If reward function rewards wins then we have to wait a long time for feedback
+        --> Use stockfish evaluation for instant feedback
+        --> also says how good/bad a move was and not only that is was good/bad
 Hyperparamters
     - Reward function
         - Discount value (y)
