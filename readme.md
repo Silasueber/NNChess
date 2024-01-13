@@ -5,6 +5,10 @@ In this project we tried to create a simple neural network, which predicts who i
 Neural Network vs. Random Moves            |  Variation Two
 :-------------------------:|:-------------------------:
 ![Variation one](images/random.gif)  |  ![Variation two](images/minichess2.jpeg)
+
+## Disclaimer 
+This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it)
+
 ## Getting Started
 
 To start creating your own data you can execute the dataCreation.py file.
@@ -45,9 +49,9 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 
 ## Authors
 
-* **Silas Ueberschaer** - *Initial work* - [Deischox](https://github.com/Deischox)
+* **Silas Ueberschaer** - [Deischox](https://github.com/Deischox)
 
-* **Benjamin Pöhlmann** - *Initial work* - [Bepo1337](https://github.com/Bepo1337)
+* **Benjamin Pöhlmann** - [Bepo1337](https://github.com/Bepo1337)
 
 
 ## License
