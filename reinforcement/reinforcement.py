@@ -8,6 +8,7 @@ import torch.optim as optim
 from stockfishHelper import initializeStockfish
 import numpy as np
 import csv
+import copy
 
 # Workflow mainly from here: https://towardsdatascience.com/reinforcement-learning-explained-visually-part-5-deep-q-networks-step-by-step-5a5317197f4b
 # Some GPT conversation: https://chat.openai.com/share/296512a2-3cf9-4378-8bb9-992b3f3c110c
@@ -35,8 +36,6 @@ def setup_environment():
     board = create_random_state()
     return stockfish, board
 
-
-#TODO put into own file and dont duplicate
 one_hot_mapping = {
     0: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],       # Empty
     1: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],       # White Pawn
@@ -206,7 +205,6 @@ def create_new_example(state, enemy_player, q_net):
 
 def create_new_examples(games, turns, q_net):
     for game in range(games):
-        #setup new board, enemy
         enemy_player, board = setup_environment()
         next_state = board
         for turn in range(turns):
@@ -274,12 +272,12 @@ def select_best_values_for_each_example(predicted_target_values):
 def train(epochs, batch_size):
     #load model if exists
     q_net = load_model()
-    target_net = q_net #TODO pass by value or referenceß
+    target_net = copy.deepcopy(q_net) # otherwise same object
     loss_fn = nn.MSELoss()
     optimizer = optim.Adam(q_net.parameters(), lr=0.01)
     for epoch in range(epochs):
         #new training data
-        create_new_examples(5, 20, q_net)
+        #create_new_examples(5, 20, q_net)
         number_of_rows = get_number_of_rows_in_training_set()
         possible_indices = [*range(0, number_of_rows, 1)]
         batch_indices = random.sample(possible_indices, batch_size)
@@ -309,7 +307,7 @@ def train(epochs, batch_size):
         # every 5 epochs, copy q net to target
     # save model
     torch.save(q_net, model_name)
-train(1, 20)
+train(100, 600)
 #create_new_examples(10, 20, load_model())
 
 
