@@ -1,10 +1,24 @@
 import chess
 import chess.pgn
 import torch
-# from dataCreation import convertPositionToString
+import random
+import argparse
+import sys
 
-# 1. Init model
-model = torch.load("models/minichess.pt")
+# Initialize parser
+parser = argparse.ArgumentParser()
+parser.add_argument("--play", nargs="?",
+                    help="To determine if you want to play against the NN (y or n) (Default: y)")
+parser.add_argument("--model", nargs="?",
+                    help="Which model to play against")
+args = parser.parse_args()
+
+if args.model != None:
+    # 1. Init model
+    model = torch.load("models/minichess.pt")
+else:
+    print("Please provide a model (--model)")
+    sys.exit()
 
 # 2. Init chess Board
 initial_fen = "2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1"
@@ -33,16 +47,6 @@ def convertPositionToString(board):
 
 
 def evalPosition():
-    # little cheating
-    moves = list(board.legal_moves)
-    if len(moves) == 0:
-        if board.is_checkmate():
-            if board.turn:
-                return -100
-            else:
-                return 100
-        return 0.5
-
     whites_turn = board.turn
     position = ("1," + convertPositionToString(board)
                 if whites_turn else "0," + convertPositionToString(board))
@@ -88,19 +92,57 @@ def getBestMove():
             bestValue = value
             bestMove = move
         board.pop()
-    print(bestValue)
     return bestMove
 
 
+def printBoard():
+    print("a b c d e f g h")
+    print("---------------")
+    print(board)
+
+
 # 5. Game Loop
-counter = 1
 node = game
 
+if args.play != None:
+    if args.play == "y":
+        play = True
+    else:
+        play = False
+else:
+    play = True
+
 while not board.is_game_over():
+    # Bot move
     move = getBestMove()
     node = node.add_variation(move)
     board.push(move)
-    counter += 1
+
+    if play:
+        # Human move
+        printBoard()
+        if not board.is_game_over():
+            correct_move = False
+            while not correct_move:
+                move = input("Your move (ex. e2e4): ")
+                try:
+                    board.push_uci(move)
+                    node = node.add_variation(chess.Move.from_uci(str(move)))
+                    correct_move = True
+                    printBoard()
+                except:
+                    print("Invalid move!")
+
+    else:
+        # Random move
+        if not board.is_game_over():
+            legal_moves = [move for move in board.legal_moves]
+            random_move = random.choice(legal_moves)
+            node = node.add_variation(random_move)
+            board.push(random_move)
+
 
 # Print and save the PGN
 print(game)
+print(" ")
+print("open https://www.chess.com/analysis?tab=analysis -> paste output in 'Load From FEN/PGN(s)'")

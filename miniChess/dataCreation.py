@@ -2,6 +2,18 @@ import csv
 import chess
 from stockfishHelper import initializeStockfish
 import random
+import argparse
+
+# Initialize parser
+parser = argparse.ArgumentParser()
+parser.add_argument("--amount", nargs="?",
+                    help="Amount of games (Default: 10)")
+parser.add_argument("--random", nargs="?",
+                    help="Random move instead of best move (Default: 0.5)")
+parser.add_argument("--position", nargs="?",
+                    help="Start position of the chess game (Default: 2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1)")
+args = parser.parse_args()
+
 
 # Init Stockfish parameters
 stockfish_white = initializeStockfish()
@@ -90,7 +102,7 @@ def playGame(random_moves=0.5):
         if draw_counter > 5:
             break
         try:
-            if random.random() > random_moves:
+            if random.random() < random_moves:
                 if board.turn:
                     createDataEntry(whitesTurn=True)
                     playMove(stockfish_white.get_best_move_time(100))
@@ -132,8 +144,21 @@ def setPosition(position):
     board.set_fen(position)
 
 
-amount_of_games = 100
+if args.amount != None:
+    amount_of_games = int(args.amount)
+else:
+    amount_of_games = 10
+
+if args.random != None:
+    random_moves = float(args.random)
+else:
+    random_moves = 0.5
+
+if args.position != None:
+    position = args.position
+else:
+    position = "2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1"
 for i in range(amount_of_games):
     print("Current Game: " + str(i+1))
-    setPosition("2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1")
-    playGame()
+    setPosition(position)
+    playGame(random_moves=random_moves)

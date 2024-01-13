@@ -4,3 +4,4 @@
 - Daten entfernen die wir nicht brauchen 
 - Code Funktionen umlagern 
 - Spielen gegen minichess Bot 
+- Move files out of miniChess Folder 

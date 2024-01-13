@@ -7,7 +7,23 @@ Neural Network vs. Random Moves            |  Variation Two
 ![Variation one](images/random.gif)  |  ![Variation two](images/minichess2.jpeg)
 ## Getting Started
 
-To start creating your own data you can execute the 
+To start creating your own data you can execute the dataCreation.py file.
+
+```
+python dataCreation.py --amount=10 --random=0.5
+```
+
+After creating the data you can train the model with the train.py file.
+
+```
+python train.py --epoch=100 --batch=100 --dataset=data/miniChess.csv --name=model.pt --lr=0.1
+```
+
+The final step is now to play against the trained model, or let the trained model play against a bot.
+
+```
+python train.py --epoch=100 --batch=100 --dataset=data/miniChess.csv --name=model.pt --lr=0.1
+```
 
 ### Prerequisites
 
