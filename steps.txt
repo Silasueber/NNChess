@@ -1,0 +1,6 @@
+- Ordner mit sachen die wir nicht in der Presentation haben
+- Eval CSV datei für minichess DONE
+-> Eval Function for miniChess 
+- Daten entfernen die wir nicht brauchen 
+- Code Funktionen umlagern 
+- Spielen gegen minichess Bot 

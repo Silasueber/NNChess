@@ -3,3 +3,4 @@
 /.idea
 test.py
 data/p2_one_hot_encoded.npy
+/miniChess/data/*

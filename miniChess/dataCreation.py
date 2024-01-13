@@ -47,7 +47,7 @@ def createDataEntry(whitesTurn):
     position = convertPositionToString(stockfish_black.get_board_visual())
     turn = "1," if whitesTurn else "0,"
     # Dataset three with cpawn value for position [limited at -10 and +10]
-    csv_path = "data/miniChess.csv"
+    csv_path = "eval/miniChess.csv"
     winner = getCpawnValue()
     line = turn+position+","+str(winner)
     try:
@@ -132,7 +132,7 @@ def setPosition(position):
     board.set_fen(position)
 
 
-amount_of_games = 1000
+amount_of_games = 100
 for i in range(amount_of_games):
     print("Current Game: " + str(i+1))
     setPosition("2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1")
