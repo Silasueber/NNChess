@@ -1,6 +1,10 @@
+import os
+
 import chess
 import torch
+import random
 import torch.nn as nn
+import torch.optim as optim
 from stockfishHelper import initializeStockfish
 import numpy as np
 import csv
@@ -10,32 +14,26 @@ import csv
 
 
 csv_file_name = "data/training.csv"
+model_name = "models/reinforcement.pt"
 epsilon = 0.95
-# Workflow 1.:
+evaluator = initializeStockfish()
+
 possible_pieces = 5 * 2 + 1 #each player has 5 unique pieces (King, Pawn, Knight, Rook, Bishop) and empty field
 fields_in_chess_board = 8*8
 input_size = possible_pieces*fields_in_chess_board
 no_of_white_pieces = 8 #we play only white, therefore only need white actions
 output_size = no_of_white_pieces * fields_in_chess_board # simplified assumptuion that every piece can move everywhere during the game
-q_net = nn.Sequential(
-    nn.Linear(input_size, 256),
-    nn.ReLU(),
-    nn.Linear(256, 32),
-    nn.ReLU(),
-    nn.Linear(32, output_size)
-)
-target_net = q_net # copy q_net to target net
+
 
 #2 Workflow --> Generate data
 board_viz = initializeStockfish() #TODO different stockfish so i dont mix it up for eval
 # See how much functionality we need, otherwise put in own class/file
 def create_random_state():
-    return chess.Board("2rknb2/2pppp2/8/8/8/8/2PPPP2/2RKNB2 w - - 0 1")  # TODO just starting board for now
+    return chess.Board("2rknb2/2pppp2/8/8/8/8/2PPPP2/2RKNB2 w - - 0 1") # TODO just starting position for now
 def setup_environment():
     stockfish = initializeStockfish(1000)
     board = create_random_state()
-    evaluator = initializeStockfish() #must be best version of stockfish i think
-    return stockfish, board, evaluator
+    return stockfish, board
 
 
 #TODO put into own file and dont duplicate
@@ -120,44 +118,54 @@ def map_action_indice_to_move(state, action):
     number = (action % 64) // 8 + 1
     piece_type = get_piece_type_of(piece_name)
     square_indices = list(state.pieces(piece_type, chess.WHITE)) #fields on board are numbered from 0 to 63
-    if len(square_indices) > 1: #Pawns cuz we have 4
+    if len(square_indices) > 1: #Pawns cuz we have 4 #TODO only in the beginning
+        # TODO handle if he wants to move first pawn (c file) but it doesnt exist anymore, so it moves the d file pawn cuz its now in first index
         pawn_index = determine_pawn_from_file(file)
-        current_position_of_piece = chess.square_name(square_indices[pawn_index])
+        try:
+            current_position_of_piece = chess.square_name(square_indices[pawn_index])
+        except:
+            return None #piece doesnt exist anymore
     else:
-        current_position_of_piece = chess.square_name(square_indices[0])
+        try:
+            current_position_of_piece = chess.square_name(square_indices[0])
+        except:
+            return None #piece doesnt exist anymore
     #ie with action 3 i expect for pawn1 c2d1
     return current_position_of_piece + file + str(number)
 
 
 def get_move_from_q_values(state, q_value_action):
-
     legal = False
     while legal is False:
         # Greedy Epsilon TODO variable with time
         if np.random.rand() < epsilon:
-            action = np.random.randint(0, output_size)
+            action_index = np.random.randint(0, output_size)
         else:
-            action = np.argmax(q_value_action.detach().numpy())
-        move = map_action_indice_to_move(state, action)
+            action_index = np.argmax(q_value_action.detach().numpy())
+        move = map_action_indice_to_move(state, action_index)
         try:
             move_algebraic_notation = chess.Move.from_uci(move)
             if move_algebraic_notation in list(state.legal_moves):
                 legal = True
-                return move_algebraic_notation
+                return move_algebraic_notation, action_index
         except:
             legal = False
             #dont handle
 
-def save_example(current_state, action, reward, next_state):
-    current_state_as_csv = ','.join(['%.0f' % num for num in current_state])
-    next_state_as_csv = ','.join(['%.0f' % num for num in next_state])
+def save_example(current_state, action, reward, next_state, action_index):
+    if reward is not None:
+        current_state_as_csv = ','.join(['%.0f' % num for num in current_state])
+        next_state_as_csv = ','.join(['%.0f' % num for num in next_state])
 
-    concatenated_example = current_state_as_csv + "+"+ str(action) + "+" + str(reward) + "+" + next_state_as_csv
-    try:
-        with open(csv_file_name, 'a', newline='') as csv_file:
-            csv_file.write(concatenated_example + '\n')
-    except Exception as e:
-        print(f"Error in 'save_example': {e}")
+        concatenated_example = current_state_as_csv + "+" + str(action) + "+" + str(reward) + "+" + next_state_as_csv + "+" + str(action_index)
+        try:
+            with open(csv_file_name, 'a', newline='') as csv_file:
+                csv_file.write(concatenated_example + '\n')
+                print(f"save state, {action}, {reward}, next state to {csv_file_name}")
+        except Exception as e:
+            print(f"Error in 'save_example': {e}")
+    else:
+        print("game over?")
 
 def determine_reward(before_action, after_action):
     # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
@@ -170,7 +178,7 @@ def determine_reward(before_action, after_action):
         return eval_value_after_action - eval_value_before_action
 
 
-def create_new_example(state):
+def create_new_example(state, enemy_player, q_net):
     #transform state into one hot
     current_state = transformSingleBoardToOneHot(state)
     # evaluate current position
@@ -180,7 +188,7 @@ def create_new_example(state):
     # put state into NN
     q_values = q_net(input_for_net)
     # greedy epsilon with output and check if its legal, otherwise go do it again
-    agent_move = get_move_from_q_values(state, q_values)
+    agent_move, action_index = get_move_from_q_values(state, q_values)
     # do step
     state.push(agent_move)
     # calculate reward
@@ -193,11 +201,117 @@ def create_new_example(state):
     state.push(chess.Move.from_uci(best_enemy_move))
     next_state = transformSingleBoardToOneHot(state)
     #save as example
-    save_example(current_state, agent_move, reward, next_state)
-    print(f"save state, action, reward, next state to {csv_file_name}")
+    save_example(current_state, agent_move, reward, next_state, action_index)
+    return state
 
-enemy_player, board, evaluator = setup_environment()
-create_new_example(board)
+def create_new_examples(games, turns, q_net):
+    for game in range(games):
+        #setup new board, enemy
+        enemy_player, board = setup_environment()
+        next_state = board
+        for turn in range(turns):
+            next_state = create_new_example(next_state, enemy_player, q_net)
+            if next_state.is_game_over():
+                break
+
+def get_number_of_rows_in_training_set():
+    with open(csv_file_name) as f:
+       return sum(1 for row in f)
+
+def transform_csv_row_into_parts(row):
+    row = ",".join(row)
+    parts = row.split("+")
+    return parts[0], parts[1], parts[2], parts[3], parts[4]
+def load_training_data(batch_indices):
+    current_states = np.array([])
+    actions = np.array([])
+    rewards = np.array([])
+    next_states = np.array([])
+    action_indices = np.array([], dtype=int)
+    with open(csv_file_name) as f:
+        reader = csv.reader(f)
+        training_rows = [row for idx, row in enumerate(reader) if idx in batch_indices]
+    for row in training_rows:
+        current_state, action, reward, next_state, action_index = transform_csv_row_into_parts(row)
+        current_states = np.append(current_states, np.fromstring(current_state, sep=",", dtype=float))
+        actions = np.append(actions, action)
+        rewards = np.append(rewards, int(reward))
+        next_states = np.append(next_states, np.fromstring(next_state, sep=",", dtype=float))
+        action_indices = np.append(action_indices, int(action_index))
+
+    return current_states.reshape(len(training_rows), input_size),\
+        actions,\
+        rewards,\
+        next_states.reshape(len(training_rows), input_size),\
+        action_indices
+
+def load_model():
+    if os.path.isfile(model_name):
+        return torch.load(model_name)
+    else:
+        return nn.Sequential(
+            nn.Linear(input_size, 256),
+            nn.ReLU(),
+            nn.Linear(256, 32),
+            nn.ReLU(),
+            nn.Linear(32, output_size)
+        )
+def get_q_value_of_selected_action(q_values, action_indices):
+    # Map action to index of q_values
+    selected_q_values = torch.empty(q_values.shape[0])
+    for i in range(q_values.shape[0]):
+        selected_q_values[i] = q_values[i][action_indices[i]]
+
+    return selected_q_values
+
+def select_best_values_for_each_example(predicted_target_values):
+    max_prediction_values = torch.empty(predicted_target_values.shape[0])
+    for i in range(predicted_target_values.shape[0]):
+        current_tensor = predicted_target_values[i]
+        max_prediction_values[i] = torch.max(current_tensor)
+
+    return max_prediction_values
+def train(epochs, batch_size):
+    #load model if exists
+    q_net = load_model()
+    target_net = q_net #TODO pass by value or referenceß
+    loss_fn = nn.MSELoss()
+    optimizer = optim.Adam(q_net.parameters(), lr=0.01)
+    for epoch in range(epochs):
+        #new training data
+        create_new_examples(5, 20, q_net)
+        number_of_rows = get_number_of_rows_in_training_set()
+        possible_indices = [*range(0, number_of_rows, 1)]
+        batch_indices = random.sample(possible_indices, batch_size)
+        #load random batch of traninig data
+        current_states, actions, rewards, next_states, action_indices = load_training_data(batch_indices)
+        X_qnet = torch.tensor(current_states, dtype=torch.float32)
+        X_tnet = torch.tensor(next_states, dtype=torch.float32)
+        rewards_tensor = torch.tensor(rewards, dtype=torch.float32)
+        # q-net predicts value ONLY for the one action we actually selected in the data creation
+        predicted_q_values = q_net(X_qnet)
+        value_of_selected_actions = get_q_value_of_selected_action(predicted_q_values, action_indices)
+
+        # target predicts target q value
+        predicted_target_values = target_net(X_tnet)
+        # best action that can be taken from these states (target q value)
+        best_q_values = select_best_values_for_each_example(predicted_target_values)
+        # Target Q Value is output of target plus reward from sample
+        target_q_values = rewards_tensor + best_q_values #TODO big difference between values in those tensors (rewards way larger than q_vals)
+        # compute loss
+        loss = loss_fn(value_of_selected_actions, target_q_values)
+            # q value from action taken from qnet, reward and q value of best action
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        print(f'Finished epoch {epoch}, latest loss {loss}')
+        #train q network, target net is fixed
+        # every 5 epochs, copy q net to target
+    # save model
+    torch.save(q_net, model_name)
+train(1, 20)
+#create_new_examples(10, 20, load_model())
+
 
 ### Workflow
 # 1. Init Q network with random weights and copy to target net
