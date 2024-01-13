@@ -132,7 +132,7 @@ def setPosition(position):
     board.set_fen(position)
 
 
-amount_of_games = 100
+amount_of_games = 1000
 for i in range(amount_of_games):
     print("Current Game: " + str(i+1))
     setPosition("2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1")

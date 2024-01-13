@@ -25,13 +25,13 @@ model = nn.Sequential(
 model = torch.load("models/minichess.pt")
 
 loss_fn = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 batch_size = 10
 dataset = TensorDataset(X, y)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-n_epochs = 200
+n_epochs = 100
 for epoch in range(n_epochs):
     avg_loss = 0
     amount = 0
