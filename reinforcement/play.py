@@ -4,7 +4,7 @@ import torch
 import random
 import argparse
 import sys
-from reinforcement import convertPositionToString, transformSingleBoardToOneHot, get_highest_legal_q_value_from_predictions, map_action_indice_to_move
+from reinforcement import convertPositionToString, transformSingleBoardToOneHot, get_highest_legal_q_value_from_predictions2, map_action_indice_to_move
 
 # Initialize parser
 parser = argparse.ArgumentParser()
@@ -41,9 +41,7 @@ def getBestMove():
     #predict move
     action_q_values = model(X)
     # select highest q value
-    _, index_of_action = get_highest_legal_q_value_from_predictions(board, action_q_values)
-    move = map_action_indice_to_move(board, index_of_action)
-    move = chess.Move.from_uci(move)
+    move = get_highest_legal_q_value_from_predictions2(board, action_q_values)
     return move
 
 # 5. Game Loop
