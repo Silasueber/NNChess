@@ -307,7 +307,7 @@ def uci_to_algebraic_notation(uci):
     except:
         return chess.Move.from_uci("0000")
 
-def get_highest_legal_q_value_from_predictions2(state, q_values):
+def get_highest_legal_q_value_from_predictions(state, q_values):
     found_legal_move = False
     # copy tensor to another one which we can shorten
     copy_of_tensor = copy.copy(q_values)
@@ -324,48 +324,26 @@ def get_highest_legal_q_value_from_predictions2(state, q_values):
         else:
             copy_of_tensor = torch.cat(
                 [copy_of_tensor[0:index_of_highest_q_value_in_copy], copy_of_tensor[index_of_highest_q_value_in_copy + 1:]])
-    #   if not --> shorten & look again
-    # when highest move is legal --> see in OG tensor which index it had and pass it to map_action_indice_to_move()
-def get_highest_legal_q_value_from_predictions(state, q_values):
-    found_legal_move = False
-    considered_tensor = copy.deepcopy(q_values)
-    try:
-        while not found_legal_move and considered_tensor.shape[0] > 0:
-            index_of_action = int(torch.argmax(considered_tensor))
 
-            index_from_original_tensor = torch.max()
-            move = map_action_indice_to_move(state, index_of_action) #this has to be the index from the original tensor
-            if move is not None:
-                move_algebraic_notation = uci_to_algebraic_notation(move)
-                if move_algebraic_notation in list(state.legal_moves):
-                    return q_values[index_of_action], index_of_action
-                else:  # else we remove this element from tensor cause its an illegal move
-                    q_values = torch.cat(
-                        [q_values[0:index_of_action], q_values[index_of_action + 1:]])
-            else:  # else we remove this element from tensor cause its an illegal move
-                q_values = torch.cat(
-                    [q_values[0:index_of_action], q_values[index_of_action + 1:]])
-        return None, None
-    except:
-        print("why")
 def select_best_values_for_each_example(predicted_target_values, next_states_as_fen):
 
     max_prediction_values = torch.empty(predicted_target_values.shape[0])
     for i in range(predicted_target_values.shape[0]):
         considered_state_as_fen = next_states_as_fen[i]
         state_of_considered_board = chess.Board(considered_state_as_fen)
-        considered_tensor = predicted_target_values[i]
-        # max_prediction_values[i], _ = get_highest_legal_q_value_from_predictions(considered_state_as_fen, considered_tensor)
+        considered_tensor = copy.copy(predicted_target_values[i])
         found_legal_move = False
         while not found_legal_move and considered_tensor.shape[0] > 0:
-            index_of_action = int(torch.argmax(considered_tensor))
-            move = map_action_indice_to_move(state_of_considered_board, index_of_action)
-            move_algebraic_notation = uci_to_algebraic_notation(move)
-            if move_algebraic_notation in list(state_of_considered_board.legal_moves):
-                max_prediction_values[i] = considered_tensor[index_of_action]#torch.max(considered_tensor)
+            highest_q_value = torch.max(considered_tensor)
+            index_of_highest_q_value_in_copy = torch.argmax(considered_tensor)
+            index_in_orginal_q_values = ((predicted_target_values[i] == highest_q_value).nonzero(as_tuple=True)[0])
+            move = map_action_indice_to_move(state_of_considered_board, int(index_in_orginal_q_values))
+            move = uci_to_algebraic_notation(move)
+            if move is not None and move in list(state_of_considered_board.legal_moves):
                 found_legal_move = True
+                max_prediction_values[i] = highest_q_value
             else: # else we remove this element from tensor cause its an illegal move
-                considered_tensor = torch.cat([considered_tensor[0:index_of_action], considered_tensor[index_of_action+1:]])
+                considered_tensor = torch.cat([considered_tensor[0:index_of_highest_q_value_in_copy], considered_tensor[index_of_highest_q_value_in_copy + 1:]])
     return max_prediction_values
 def train(epochs, batch_size):
     #load model if exists
