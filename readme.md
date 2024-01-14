@@ -2,9 +2,9 @@
 
 In this project we tried to create a simple neural network, which predicts who is currently winning in a chess game. The project also involves creating our own datasets with the help of [Stockfish](https://stockfishchess.org) the strongest chess engine at the time, and the ability to play against the trained neural network. Because this is a student project, and we have limited resources, we decided to focus on "mini chess", a chess variation with less pieces to make the training process easier and faster. 
  
-Neural Network vs. Random Moves            |  Variation Two
+Neural Network vs. Random Moves            |  Neural Network vs. Stockfish (Elo=200)
 :-------------------------:|:-------------------------:
-![Variation one](images/random.gif)  |  ![Variation two](images/minichess2.jpeg)
+![Variation one](images/random.gif)  |  ![Variation two](images/stockfish200.gif)
 
 ## Disclaimer 
 This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it)
