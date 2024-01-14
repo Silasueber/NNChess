@@ -16,7 +16,8 @@ import copy
 
 csv_file_name = "data/training.csv"
 model_name = "models/reinforcement.pt"
-epsilon = 0.95
+epsilon = 0.95 # for epsilon greedy
+gamma = 0.95 # discount factor so immediate rewards are better than later rewards
 evaluator = initializeStockfish()
 
 possible_pieces = 5 * 2 + 1 #each player has 5 unique pieces (King, Pawn, Knight, Rook, Bishop) and empty field
@@ -28,7 +29,6 @@ output_size = no_of_white_pieces * fields_in_chess_board # simplified assumptuio
 
 #2 Workflow --> Generate data
 board_viz = initializeStockfish() #TODO different stockfish so i dont mix it up for eval
-# See how much functionality we need, otherwise put in own class/file
 def create_random_state():
     return chess.Board("2rknb2/2pppp2/8/8/8/8/2PPPP2/2RKNB2 w - - 0 1") # TODO just starting position for now
 def setup_environment():
@@ -136,7 +136,7 @@ def map_action_indice_to_move(state, action):
 def get_move_from_q_values(state, q_value_action):
     legal = False
     while legal is False:
-        # Greedy Epsilon TODO variable with time
+        # Greedy Epsilon
         if np.random.rand() < epsilon:
             action_index = np.random.randint(0, output_size)
         else:
@@ -164,7 +164,7 @@ def save_example(current_state, action, reward, next_state, action_index):
         except Exception as e:
             print(f"Error in 'save_example': {e}")
     else:
-        print("game over?")
+        print("Shouldnt happen: reward was None")
 
 def determine_reward(before_action, after_action):
     # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
@@ -172,10 +172,28 @@ def determine_reward(before_action, after_action):
     eval_type_after_action = after_action.get('type')
     eval_value_before_action = before_action.get("value")
     eval_value_after_action = after_action.get("value")
-    # TODO can also be other type right? == "mate"
+    change_of_cpawn_value = eval_value_after_action - eval_value_before_action
     if eval_type_before_action == "cp" and eval_type_after_action == "cp":
-        return eval_value_after_action - eval_value_before_action
-
+        if change_of_cpawn_value > 0:
+            return +1
+        elif change_of_cpawn_value < 0:
+            return -1
+        else:
+            return 0
+    elif eval_type_before_action == "cp" and eval_type_after_action == "mate":
+        if eval_value_after_action > 0:
+            return 10
+        elif eval_value_after_action < 0:
+            return -10 # means we did a bad action to set ourselves mate in x turns
+        else:
+            return 0
+    elif eval_type_before_action == "mate" and eval_type_after_action == "mate":
+        if change_of_cpawn_value > 0:
+            return +1
+        elif change_of_cpawn_value < 0:
+            return -1
+        else:
+            return 0
 
 def create_new_example(state, enemy_player, q_net):
     #transform state into one hot
@@ -261,13 +279,24 @@ def get_q_value_of_selected_action(q_values, action_indices):
         selected_q_values[i] = q_values[i][action_indices[i]]
 
     return selected_q_values
+def transform_one_hot_board_to_fen():
+    print()# transform one hot into back into field map basically
 
-def select_best_values_for_each_example(predicted_target_values):
+def select_best_values_for_each_example(next_states, predicted_target_values):
+
     max_prediction_values = torch.empty(predicted_target_values.shape[0])
     for i in range(predicted_target_values.shape[0]):
-        current_tensor = predicted_target_values[i]
-        max_prediction_values[i] = torch.max(current_tensor)
-
+        considered_state = transform_one_hot_board_to_fen(next_states[i])
+        considered_tensor = predicted_target_values[i]
+        while considered_tensor.shape[0] > 0:
+            index_of_action = torch.argmax(considered_tensor)
+            move = map_action_indice_to_move(considered_state, index_of_action)
+            move_algebraic_notation = chess.Move.from_uci(move)
+            if move_algebraic_notation in list(considered_state.legal_moves):
+                max_prediction_values[i] = considered_tensor[index_of_action]#torch.max(considered_tensor)
+                break
+            else: # else we remove this element from tensor cause its an illegal move
+                considered_tensor = torch.cat([considered_tensor[0:index_of_action], considered_tensor[index_of_action+1:]])
     return max_prediction_values
 def train(epochs, batch_size):
     #load model if exists
@@ -276,8 +305,12 @@ def train(epochs, batch_size):
     loss_fn = nn.MSELoss()
     optimizer = optim.Adam(q_net.parameters(), lr=0.01)
     for epoch in range(epochs):
+        #every 5 epochs lower the epsilon value
+        if epoch % 5 == 0:
+            global epsilon
+            epsilon = epsilon * 0.95
         #new training data
-        #create_new_examples(5, 20, q_net)
+        #create_new_examples(1, 20, q_net)
         number_of_rows = get_number_of_rows_in_training_set()
         possible_indices = [*range(0, number_of_rows, 1)]
         batch_indices = random.sample(possible_indices, batch_size)
@@ -293,9 +326,10 @@ def train(epochs, batch_size):
         # target predicts target q value
         predicted_target_values = target_net(X_tnet)
         # best action that can be taken from these states (target q value)
-        best_q_values = select_best_values_for_each_example(predicted_target_values)
+        # TODO these have to be legal actions!
+        best_q_values = select_best_values_for_each_example(next_states, predicted_target_values)
         # Target Q Value is output of target plus reward from sample
-        target_q_values = rewards_tensor + best_q_values #TODO big difference between values in those tensors (rewards way larger than q_vals)
+        target_q_values = rewards_tensor + gamma * best_q_values #TODO big difference between values in those tensors (rewards way larger than q_vals)
         # compute loss
         loss = loss_fn(value_of_selected_actions, target_q_values)
             # q value from action taken from qnet, reward and q value of best action
@@ -304,11 +338,11 @@ def train(epochs, batch_size):
         optimizer.step()
         print(f'Finished epoch {epoch}, latest loss {loss}')
         #train q network, target net is fixed
-        # every 5 epochs, copy q net to target
+        # every x epochs, copy q net to target TODO when to copy?
     # save model
     torch.save(q_net, model_name)
-train(100, 600)
-#create_new_examples(10, 20, load_model())
+#train(1, 600)
+create_new_examples(1, 20, load_model())
 
 
 ### Workflow
