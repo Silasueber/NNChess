@@ -52,8 +52,8 @@ one_hot_mapping = {
 
 
 def convertPositionToString(fen):
-    #TODO, have to have different values
-    piece_values = {'p': 1, 'r': 5, 'n': 4, 'b': 3, 'q': 10, 'k': 1000}
+    #TODO, have to have different values than in other files cuz we distinguish between bishop/knight
+    piece_values = {'p': 1, 'r': 5, 'n': 4, 'b': 3, 'k': 1000}
     fen_board = chess.Board(fen)
     fen_board = str(fen_board)
     lines = fen_board.split('\n')
@@ -76,6 +76,8 @@ def transformSingleBoardToOneHot(state_param):
     state_param = state_param.split(',')
     newBoardRepresentation = np.array([])
     for field in state_param[:]:
+        if(int(field) == 10):
+            print("breakpoint")
         newBoardRepresentation = np.append(newBoardRepresentation, one_hot_mapping[int(field)])
 
     return newBoardRepresentation
@@ -151,20 +153,20 @@ def get_move_from_q_values(state, q_value_action):
             legal = False
             #dont handle
 
-def save_example(current_state, action, reward, next_state, action_index):
+def save_example(current_state, action, reward, next_state, action_index, next_state_as_fen):
     if reward is not None:
         current_state_as_csv = ','.join(['%.0f' % num for num in current_state])
         next_state_as_csv = ','.join(['%.0f' % num for num in next_state])
 
-        concatenated_example = current_state_as_csv + "+" + str(action) + "+" + str(reward) + "+" + next_state_as_csv + "+" + str(action_index)
+        concatenated_example = current_state_as_csv + "+" + str(action) + "+" + str(reward) + "+" + next_state_as_csv + "+" + str(action_index) + "+" + next_state_as_fen
         try:
             with open(csv_file_name, 'a', newline='') as csv_file:
                 csv_file.write(concatenated_example + '\n')
-                print(f"save state, {action}, {reward}, next state to {csv_file_name}")
+                print(f"save state, {action}, {reward}, next state, action_index, next_state_as_fen to {csv_file_name}")
         except Exception as e:
             print(f"Error in 'save_example': {e}")
     else:
-        print("Shouldnt happen: reward was None")
+        print("Shouldn't happen: reward was None")
 
 def determine_reward(before_action, after_action):
     # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
@@ -174,6 +176,8 @@ def determine_reward(before_action, after_action):
     eval_value_after_action = after_action.get("value")
     change_of_cpawn_value = eval_value_after_action - eval_value_before_action
     if eval_type_before_action == "cp" and eval_type_after_action == "cp":
+        # if abs(change_of_cpawn_value) < 50:
+        #     return 0
         if change_of_cpawn_value > 0:
             return +1
         elif change_of_cpawn_value < 0:
@@ -194,20 +198,32 @@ def determine_reward(before_action, after_action):
             return -1
         else:
             return 0
+    elif eval_type_before_action == "mate" and eval_type_after_action == "cp":
+        if eval_value_before_action > 0:
+            return -5 #had a mate and didnt do the move
+        elif eval_value_before_action < 0:
+            return +1 # was in mate and got better situation
 
 def create_new_example(state, enemy_player, q_net):
     #transform state into one hot
     current_state = transformSingleBoardToOneHot(state)
     # evaluate current position
     evaluator.set_fen_position(state.fen())
+    print("not stuck until evaluator.set_fen_position(state.fen())")
     before_action_eval = evaluator.get_evaluation()
+    print("not stuck until before_action_eval = evaluator.get_evaluation()")
     input_for_net = torch.tensor(current_state, dtype=torch.float32)
+    print("not stuck until input_for_net = torch.tensor(current_state, dtype=torch.float32)")
     # put state into NN
     q_values = q_net(input_for_net)
+    print("not stuck until  q_values = q_net(input_for_net)")
+
     # greedy epsilon with output and check if its legal, otherwise go do it again
     agent_move, action_index = get_move_from_q_values(state, q_values)
+    print("not stuck until agent_move, action_index = get_move_from_q_values(state, q_values)")
     # do step
     state.push(agent_move)
+    print("not stuck until state.push(agent_move)")
     # calculate reward
     evaluator.set_fen_position(state.fen())
     after_action_eval = evaluator.get_evaluation()
@@ -218,16 +234,18 @@ def create_new_example(state, enemy_player, q_net):
     state.push(chess.Move.from_uci(best_enemy_move))
     next_state = transformSingleBoardToOneHot(state)
     #save as example
-    save_example(current_state, agent_move, reward, next_state, action_index)
+    save_example(current_state, agent_move, reward, next_state, action_index, state.fen())
     return state
 
 def create_new_examples(games, turns, q_net):
     for game in range(games):
         enemy_player, board = setup_environment()
         next_state = board
+        print("Starting new game")
         for turn in range(turns):
             next_state = create_new_example(next_state, enemy_player, q_net)
             if next_state.is_game_over():
+                print("Game over!")
                 break
 
 def get_number_of_rows_in_training_set():
@@ -237,24 +255,25 @@ def get_number_of_rows_in_training_set():
 def transform_csv_row_into_parts(row):
     row = ",".join(row)
     parts = row.split("+")
-    return parts[0], parts[1], parts[2], parts[3], parts[4]
+    return parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]
 def load_training_data(batch_indices):
     current_states = np.array([])
     actions = np.array([])
     rewards = np.array([])
     next_states = np.array([])
     action_indices = np.array([], dtype=int)
+    next_states_as_fen = np.array([])
     with open(csv_file_name) as f:
         reader = csv.reader(f)
         training_rows = [row for idx, row in enumerate(reader) if idx in batch_indices]
     for row in training_rows:
-        current_state, action, reward, next_state, action_index = transform_csv_row_into_parts(row)
+        current_state, action, reward, next_state, action_index, next_state_as_fen = transform_csv_row_into_parts(row)
         current_states = np.append(current_states, np.fromstring(current_state, sep=",", dtype=float))
         actions = np.append(actions, action)
         rewards = np.append(rewards, int(reward))
         next_states = np.append(next_states, np.fromstring(next_state, sep=",", dtype=float))
         action_indices = np.append(action_indices, int(action_index))
-
+        next_states_as_fen = np.append(next_state_as_fen, int())
     return current_states.reshape(len(training_rows), input_size),\
         actions,\
         rewards,\
@@ -279,24 +298,47 @@ def get_q_value_of_selected_action(q_values, action_indices):
         selected_q_values[i] = q_values[i][action_indices[i]]
 
     return selected_q_values
-def transform_one_hot_board_to_fen():
-    print()# transform one hot into back into field map basically
-
-def select_best_values_for_each_example(next_states, predicted_target_values):
+def uci_to_algebraic_notation(uci):
+    try:
+        return chess.Move.from_uci(uci)
+    except:
+        return chess.Move.from_uci("0000")
+def get_highest_legal_q_value_from_predictions(state, q_values):
+    found_legal_move = False
+    try:
+        while not found_legal_move and q_values.shape[0] > 0:
+            index_of_action = int(torch.argmax(q_values))
+            move = map_action_indice_to_move(state, index_of_action)
+            if move is not None:
+                move_algebraic_notation = uci_to_algebraic_notation(move)
+                if move_algebraic_notation in list(state.legal_moves):
+                    return q_values[index_of_action], index_of_action
+                else:  # else we remove this element from tensor cause its an illegal move
+                    q_values = torch.cat(
+                        [q_values[0:index_of_action], q_values[index_of_action + 1:]])
+            else:  # else we remove this element from tensor cause its an illegal move
+                q_values = torch.cat(
+                    [q_values[0:index_of_action], q_values[index_of_action + 1:]])
+        return None, None
+    except:
+        print("why")
+def select_best_values_for_each_example(predicted_target_values, next_states_as_fen):
 
     max_prediction_values = torch.empty(predicted_target_values.shape[0])
     for i in range(predicted_target_values.shape[0]):
-        considered_state = transform_one_hot_board_to_fen(next_states[i])
+        considered_state_as_fen = next_states_as_fen[i]
         considered_tensor = predicted_target_values[i]
-        while considered_tensor.shape[0] > 0:
-            index_of_action = torch.argmax(considered_tensor)
-            move = map_action_indice_to_move(considered_state, index_of_action)
-            move_algebraic_notation = chess.Move.from_uci(move)
-            if move_algebraic_notation in list(considered_state.legal_moves):
-                max_prediction_values[i] = considered_tensor[index_of_action]#torch.max(considered_tensor)
-                break
-            else: # else we remove this element from tensor cause its an illegal move
-                considered_tensor = torch.cat([considered_tensor[0:index_of_action], considered_tensor[index_of_action+1:]])
+        max_prediction_values[i], _ = get_highest_legal_q_value_from_predictions(considered_state_as_fen, considered_tensor)
+
+        # while not found_legal_move and considered_tensor.shape[0] > 0:
+        #     index_of_action = torch.argmax(considered_tensor)
+        #     move = map_action_indice_to_move(considered_state_as_fen, index_of_action)
+        #     move_algebraic_notation = chess.Move.from_uci(move)
+        #     if move_algebraic_notation in list(considered_state_as_fen.legal_moves):
+        #         max_prediction_values[i] = considered_tensor[index_of_action]#torch.max(considered_tensor)
+        #         found_legal_move = True
+        #     else: # else we remove this element from tensor cause its an illegal move
+        #         considered_tensor = torch.cat([considered_tensor[0:index_of_action], considered_tensor[index_of_action+1:]])
     return max_prediction_values
 def train(epochs, batch_size):
     #load model if exists
@@ -314,8 +356,8 @@ def train(epochs, batch_size):
         number_of_rows = get_number_of_rows_in_training_set()
         possible_indices = [*range(0, number_of_rows, 1)]
         batch_indices = random.sample(possible_indices, batch_size)
-        #load random batch of traninig data
-        current_states, actions, rewards, next_states, action_indices = load_training_data(batch_indices)
+        #load random batch of training data
+        current_states, actions, rewards, next_states, action_indices, next_states_as_fen = load_training_data(batch_indices)
         X_qnet = torch.tensor(current_states, dtype=torch.float32)
         X_tnet = torch.tensor(next_states, dtype=torch.float32)
         rewards_tensor = torch.tensor(rewards, dtype=torch.float32)
@@ -325,24 +367,24 @@ def train(epochs, batch_size):
 
         # target predicts target q value
         predicted_target_values = target_net(X_tnet)
-        # best action that can be taken from these states (target q value)
-        # TODO these have to be legal actions!
-        best_q_values = select_best_values_for_each_example(next_states, predicted_target_values)
+        # best legal action that can be taken from these states (target q value)
+        best_q_values = select_best_values_for_each_example(predicted_target_values, next_states_as_fen)
         # Target Q Value is output of target plus reward from sample
-        target_q_values = rewards_tensor + gamma * best_q_values #TODO big difference between values in those tensors (rewards way larger than q_vals)
+        target_q_values = rewards_tensor + gamma * best_q_values
         # compute loss
         loss = loss_fn(value_of_selected_actions, target_q_values)
-            # q value from action taken from qnet, reward and q value of best action
+        # train q network, target net is fixed
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         print(f'Finished epoch {epoch}, latest loss {loss}')
-        #train q network, target net is fixed
-        # every x epochs, copy q net to target TODO when to copy?
+
+        if epoch % 10 == 0:
+            target_net = copy.deepcopy(q_net)
     # save model
     torch.save(q_net, model_name)
 #train(1, 600)
-create_new_examples(1, 20, load_model())
+#create_new_examples(50, 20, load_model())
 
 
 ### Workflow
