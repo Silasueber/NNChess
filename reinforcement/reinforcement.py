@@ -499,7 +499,7 @@ def train(epochs, batch_size, lr):
             global epsilon
             epsilon = epsilon * 0.95 #decay epsilon after time
         #new training data each epoch with one game and 20 turns
-        #create_new_examples(1, 20, q_net)
+        create_new_examples(1, 20, q_net)
         print("Training the model...")
         number_of_rows = get_number_of_rows_in_training_set()
         possible_indices = [*range(0, number_of_rows, 1)]
@@ -526,9 +526,10 @@ def train(epochs, batch_size, lr):
         loss.backward()
         optimizer.step()
         print(f'Finished epoch {epoch}, latest loss {loss}')
-        # TODO uncomment sometime
-        # if epoch % 10 == 0:
-        #     target_net = copy.deepcopy(q_net)
+
+        # copy Q-Network to target network after some epochs
+        if epoch % 10 == 0:
+            target_net = copy.deepcopy(q_net)
     # save model
     torch.save(q_net, model_name)
 

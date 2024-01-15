@@ -79,6 +79,6 @@ print("open https://www.chess.com/analysis?tab=analysis -> paste output in 'Load
 fen_position = board.fen()
 evaluator = initializeStockfish()
 evaluator.set_fen_position(fen_position)
-print("Positive values --> White ahead /// Negative values --> Black ahead")
+print("Interpretation of evaluation: \n\tPositive values --> White ahead\n\tNegative values --> Black ahead")
 print(f"FEN-Position: {fen_position}")
 print(f"Stockfish evaluation of situation: {evaluator.get_evaluation().get('value')}")
