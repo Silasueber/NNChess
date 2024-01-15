@@ -249,8 +249,7 @@ def determine_reward(before_action, after_action):
     eval_value_after_action = after_action.get("value")
     change_of_cpawn_value = eval_value_after_action - eval_value_before_action
     if eval_type_before_action == "cp" and eval_type_after_action == "cp":
-        # if abs(change_of_cpawn_value) < 50:
-        #     return 0
+        # if cpawn changes to our favor it was a good move, otherwise bad or 0 if nothing changed
         if change_of_cpawn_value > 0:
             return +1
         elif change_of_cpawn_value < 0:
@@ -258,22 +257,29 @@ def determine_reward(before_action, after_action):
         else:
             return 0
     elif eval_type_before_action == "cp" and eval_type_after_action == "mate":
+        #if the evaluation type is now mate, we either have mate in x turns in favor or against us
+        # if for us, its a very good move
         if eval_value_after_action > 0:
             return 10
+        # if its against us, its a very bad move to put ourselves in that position
         elif eval_value_after_action < 0:
-            return -10 # means we did a bad action to set ourselves mate in x turns
+            return -10
         else:
             return 0
     elif eval_type_before_action == "mate" and eval_type_after_action == "mate":
+        # Means we had a mate in x turns and now its even less turns --> good move
         if change_of_cpawn_value > 0:
             return +1
+        # we for example had mate in 5 and now have mate in 7 --> bad move
         elif change_of_cpawn_value < 0:
             return -1
         else:
             return 0
     elif eval_type_before_action == "mate" and eval_type_after_action == "cp":
+        # had a mate but didnt do a move to further this advantage
         if eval_value_before_action > 0:
-            return -5 #had a mate and didnt do the move
+            return -5
+        # had a mate against us but did a good move to escape it. Can this ever happen?
         elif eval_value_before_action < 0:
             return +1 # was in mate and got better situation
 
@@ -473,11 +479,13 @@ def select_best_values_for_each_example(predicted_target_values, next_states_as_
             else: # else we remove this element from tensor cause its an illegal move
                 considered_tensor = torch.cat([considered_tensor[0:index_of_highest_q_value_in_copy], considered_tensor[index_of_highest_q_value_in_copy + 1:]])
     return max_prediction_values
+
 def train(epochs, batch_size, lr):
     """
     Trains the network with a number of epochs and batch-size and saves it
     :param epochs: Number of epochs to be processed
     :param batch_size: Size of batch used for each epoch
+    :param lr: Learning rate to be used for Adam optimizer
     :return:
     """
     #load model if exists
@@ -489,9 +497,9 @@ def train(epochs, batch_size, lr):
         #every 5 epochs lower the epsilon value
         if epoch % 5 == 0:
             global epsilon
-            epsilon = epsilon * 0.95
+            epsilon = epsilon * 0.95 #decay epsilon after time
         #new training data each epoch with one game and 20 turns
-        create_new_examples(1, 20, q_net)
+        #create_new_examples(1, 20, q_net)
         print("Training the model...")
         number_of_rows = get_number_of_rows_in_training_set()
         possible_indices = [*range(0, number_of_rows, 1)]
@@ -543,7 +551,7 @@ else:
     csv_file_name = "data/training.csv"
 
 if args.name is not None:
-    model_name = f"models/{args.name}"
+    model_name = f"models/{args.name}.pt"
 else:
     model_name = "models/reinforcement.pt"
 
