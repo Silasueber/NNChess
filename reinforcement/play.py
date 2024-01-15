@@ -1,91 +1,84 @@
-import chess
 import chess.pgn
 import torch
 import random
 import argparse
-import sys
-from reinforcement import convertPositionToString, transformSingleBoardToOneHot, get_highest_legal_q_value_from_predictions
-
+from reinforcement import transformSingleBoardToOneHot, get_highest_legal_q_value_from_predictions
+from stockfishHelper import initializeStockfish
 # Initialize parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--play", nargs="?",
-                    help="To determine if you want to play against the NN (y or n) (Default: n)")
 parser.add_argument("--model", nargs="?",
-                    help="Which model to play against")
-args = parser.parse_args()
+                    help="Which model to play against (default: reinforcment.pt)")
+parser.add_argument("--turns", nargs="?",
+                    help="How many turns should they each play? (default 20 each)")
+args, unknown = parser.parse_known_args()
 
-if args.model != None:
-    # 1. Init model
+# Initialize arguments and parameters
+if args.model is not None:
     model = torch.load(f"models/{args.model}.pt")
 else:
     model = torch.load("models/reinforcement.pt")
-    # print("Please provide a model (--model)")
-    # sys.exit()
 
-# 2. Init chess Board
+if args.turns is not None:
+    turns_to_be_played = int(args.turns)
+else:
+    turns_to_be_played = 20
+
+
+# Setup board
 initial_fen = "2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1"
 board = chess.Board(initial_fen)
 game = chess.pgn.Game()
 game.headers["FEN"] = initial_fen
-# 3. function to eval Position
 
 
 def printBoard():
+    """
+    prints the board to console
+    :return:
+    """
     print("a b c d e f g h")
     print("---------------")
     print(board)
 
 def getBestMove():
+    """
+    Lets the model predict Q-Values and makes the best legal play possible
+    :return: Best legal play possible as by prediction of the model
+    """
     board_one_hot = transformSingleBoardToOneHot(board)
     X = torch.tensor(board_one_hot, dtype=torch.float32)
-    #predict move
+    #predict q-values
     action_q_values = model(X)
-    # select highest q value
+    # select highest legal q value
     move = get_highest_legal_q_value_from_predictions(board, action_q_values)
     return move
 
 # 5. Game Loop
 node = game
 
-if args.play != None:
-    if args.play == "y":
-        play = True
-    else:
-        play = False
-else:
-    play = False
 
-while not board.is_game_over():
+turns_played = 0
+while not board.is_game_over() and turns_played < turns_to_be_played:
+    turns_played += 1
     # Bot move
     move = getBestMove()
     node = node.add_variation(move)
     board.push(move)
-
-    if play:
-        # Human move
-        printBoard()
-        if not board.is_game_over():
-            correct_move = False
-            while not correct_move:
-                move = input("Your move (ex. e2e4): ")
-                try:
-                    board.push_uci(move)
-                    node = node.add_variation(chess.Move.from_uci(str(move)))
-                    correct_move = True
-                    printBoard()
-                except:
-                    print("Invalid move!")
-
-    else:
-        # Random move
-        if not board.is_game_over():
-            legal_moves = [move for move in board.legal_moves]
-            random_move = random.choice(legal_moves)
-            node = node.add_variation(random_move)
-            board.push(random_move)
+    # Random move
+    if not board.is_game_over():
+        legal_moves = [move for move in board.legal_moves]
+        random_move = random.choice(legal_moves)
+        node = node.add_variation(random_move)
+        board.push(random_move)
 
 
 # Print and save the PGN
 print(game)
 print(" ")
 print("open https://www.chess.com/analysis?tab=analysis -> paste output in 'Load From FEN/PGN(s)'")
+fen_position = board.fen()
+evaluator = initializeStockfish()
+evaluator.set_fen_position(fen_position)
+print("Positive values --> White ahead /// Negative values --> Black ahead")
+print(f"FEN-Position: {fen_position}")
+print(f"Stockfish evaluation of situation: {evaluator.get_evaluation().get('value')}")

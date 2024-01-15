@@ -11,8 +11,11 @@ import numpy as np
 import csv
 import copy
 
-#Read hyperparameters
+#Read hyperparameters and configuration parameters
 parser = argparse.ArgumentParser()
+parser.add_argument("--mode", nargs="?",
+                    help="Choose to create examples (--mode=examples) with 10 games and 20 turns each "
+                         "or train the model (--mode=train) (default: None)")
 parser.add_argument("--epochs", nargs="?",
                     help="Number of epochs to train (default: 10)")
 parser.add_argument("--batch", nargs="?",
@@ -29,29 +32,22 @@ parser.add_argument("--gamma", nargs="?",
                     help="Gamma to discount future rewards (default: 0.95)")
 parser.add_argument("--enemy-elo", nargs="?",
                     help="Elo of the Stockfish enemy player in the environment (default: 1000)")
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
+evaluator = initializeStockfish() #Best Stockfish possible to make evaluations
 
+# Initialization of parameters at end of file below all methods
 # Initial environment setup
-csv_file_name = "data/training.csv"
-model_name = "models/reinforcement.pt"
-epsilon = 0.95 # for epsilon greedy
-gamma = 0.95 # discount factor so immediate rewards are better than later rewards
-evaluator = initializeStockfish()
-enemy_player = initializeStockfish(1000)
+#csv_file_name = "data/training.csv"
+#epsilon = 0.95 # for epsilon greedy
+#gamma = 0.95 # discount factor so immediate rewards are better than later rewards
+#enemy_player = initializeStockfish(1000)
 
+#Explanation of network input and output sizes
 possible_pieces = 5 * 2 + 1 #each player has 5 unique pieces (King, Pawn, Knight, Rook, Bishop) and empty field
-fields_in_chess_board = 8*8
-input_size = possible_pieces*fields_in_chess_board
+fields_in_chess_board = 8*8 # 1-8 and a-h
+input_size = possible_pieces*fields_in_chess_board # so each field can have 11 unique pieces on it
 no_of_white_pieces = 8 #we play only white, therefore only need white actions
 output_size = no_of_white_pieces * fields_in_chess_board # simplified assumptuion that every piece can move everywhere during the game
-
-def create_starting_board():
-    """
-    Returns a new mini-chess board in starting position
-    :return: New chess board
-    """
-    return chess.Board("2rknb2/2pppp2/8/8/8/8/2PPPP2/2RKNB2 w - - 0 1")
-
 #One Hot Encoding of the chess squares to act as input for the Neural Network
 one_hot_mapping = {
     0: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],       # Empty
@@ -66,6 +62,14 @@ one_hot_mapping = {
     -5: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],      # Black Rook
     -1000: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    # Black King
 }
+def create_starting_board():
+    """
+    Returns a new mini-chess board in starting position
+    :return: New chess board
+    """
+    return chess.Board("2rknb2/2pppp2/8/8/8/8/2PPPP2/2RKNB2 w - - 0 1")
+
+
 
 
 def convertPositionToString(fen):
@@ -178,17 +182,16 @@ def map_action_indice_to_move(state, action):
     return current_position_of_piece + file + str(number)
 
 
-def get_move_from_q_values(state, q_value_action):
+def get_epsilon_greedy_move_from_q_values(state, q_value_action):
     """
     Using Epsilon-Greedy it chooses a move for the agent to play
     :param state: Considered board
     :param q_value_action: The predicted Q-Values from the Network
     :return: A legal move and its index or (chess.Move.from_uci("0000"), -1) if too many iterations were needed to find a legal move
     """
-    legal = False
     number_of_tries_to_find_legal_move = 0
 
-    while legal is False:
+    while True:
         #otherwise we might be taking forever to get a legal move if we have to find a single one by chance
         if number_of_tries_to_find_legal_move > 512:
             return chess.Move.from_uci("0000"), -1
@@ -198,10 +201,8 @@ def get_move_from_q_values(state, q_value_action):
         else:
             action_index = np.argmax(q_value_action.detach().numpy())
         move = map_action_indice_to_move(state, action_index)
-        print(f"selected move: {move}")
         move_algebraic_notation = uci_to_algebraic_notation(move)
         if move_algebraic_notation in list(state.legal_moves):
-            legal = True
             return move_algebraic_notation, action_index
         number_of_tries_to_find_legal_move += 1
 
@@ -293,7 +294,7 @@ def create_new_example(state, enemy_player, q_net):
     # put state into NN
     q_values = q_net(input_for_net)
     # greedy epsilon with output and check if its legal, otherwise go do it again
-    agent_move, action_index = get_move_from_q_values(state, q_values)
+    agent_move, action_index = get_epsilon_greedy_move_from_q_values(state, q_values)
     if action_index == -1:
         return None
     # do step
@@ -376,10 +377,11 @@ def load_training_data(batch_indices):
         action_indices, \
         next_states_as_fen
 
-def load_model():
+def load_model(model_name):
     """
     Loads the model if it exists, otherwise creates new one
-    :return: Model
+    :param model_name: Name of the model
+    :return: The model
     """
     if os.path.isfile(model_name):
         return torch.load(model_name)
@@ -433,7 +435,7 @@ def get_highest_legal_q_value_from_predictions(state, q_values):
         #Match element in original q_values and return the index of that element
         index_in_orginal_q_values = ((q_values == highest_q_value).nonzero(as_tuple=True)[0])
         #if theres more than 1 element matching, we just take the first one
-        if index_in_orginal_q_values > 1:
+        if index_in_orginal_q_values.shape[0] > 1:
             index_in_orginal_q_values = index_in_orginal_q_values[0]
         move = map_action_indice_to_move(state, int(index_in_orginal_q_values))
         move = uci_to_algebraic_notation(move)
@@ -471,7 +473,7 @@ def select_best_values_for_each_example(predicted_target_values, next_states_as_
             else: # else we remove this element from tensor cause its an illegal move
                 considered_tensor = torch.cat([considered_tensor[0:index_of_highest_q_value_in_copy], considered_tensor[index_of_highest_q_value_in_copy + 1:]])
     return max_prediction_values
-def train(epochs, batch_size):
+def train(epochs, batch_size, lr):
     """
     Trains the network with a number of epochs and batch-size and saves it
     :param epochs: Number of epochs to be processed
@@ -479,17 +481,18 @@ def train(epochs, batch_size):
     :return:
     """
     #load model if exists
-    q_net = load_model()
-    target_net = copy.deepcopy(q_net) # otherwise same object
+    q_net = load_model(model_name)
+    target_net = copy.deepcopy(q_net) # otherwise it'd be the same object
     loss_fn = nn.MSELoss()
-    optimizer = optim.Adam(q_net.parameters(), lr=0.01)
+    optimizer = optim.Adam(q_net.parameters(), lr=lr)
     for epoch in range(epochs):
         #every 5 epochs lower the epsilon value
         if epoch % 5 == 0:
             global epsilon
             epsilon = epsilon * 0.95
-        #new training data
-        # create_new_examples(1, 20, q_net)
+        #new training data each epoch with one game and 20 turns
+        create_new_examples(1, 20, q_net)
+        print("Training the model...")
         number_of_rows = get_number_of_rows_in_training_set()
         possible_indices = [*range(0, number_of_rows, 1)]
         batch_indices = random.sample(possible_indices, batch_size)
@@ -515,11 +518,66 @@ def train(epochs, batch_size):
         loss.backward()
         optimizer.step()
         print(f'Finished epoch {epoch}, latest loss {loss}')
-
+        # TODO uncomment sometime
         # if epoch % 10 == 0:
         #     target_net = copy.deepcopy(q_net)
     # save model
     torch.save(q_net, model_name)
 
-#train(10, 600)
-create_new_examples(50, 20, load_model())
+
+#Set arguments passed in call
+if args.epochs is not None:
+    n_epochs = int(args.epochs)
+else:
+    n_epochs = 10
+
+if args.batch is not None:
+    batch_size = int(args.batch)
+else:
+    batch_size = 600
+
+
+if args.dataset is not None:
+    csv_file_name = f"data/{args.mode}"
+else:
+    csv_file_name = "data/training.csv"
+
+if args.name is not None:
+    model_name = f"models/{args.name}"
+else:
+    model_name = "models/reinforcement.pt"
+
+if args.dataset is not None:
+    csv_file_name = f"data/{args.dataset}.csv"
+else:
+    csv_file_name = "data/training.csv"
+
+if args.lr is not None:
+    lr = float(args.lr)
+else:
+    lr = 0.01
+
+if args.epsilon is not None:
+    epsilon = float(args.epsilon)
+else:
+    epsilon = 0.95
+
+if args.gamma is not None:
+    gamma = float(args.gamma)
+else:
+    gamma = 0.95
+
+if args.enemy_elo is not None:
+    enemy_player = initializeStockfish(int(args.enemy_elo))
+else:
+    enemy_player = initializeStockfish(1000)
+
+# !!! Most important part: Decides if we train or create new examples !!!
+if args.mode is not None:
+    if args.mode == "train":
+        train(n_epochs, batch_size, lr)
+    elif args.mode =="examples":
+        create_new_examples(10, 20, load_model(model_name))
+else:
+    print("No mode was chosen, nothing is done in reinforcement.py")
+
