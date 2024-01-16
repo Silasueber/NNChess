@@ -9,7 +9,7 @@ Neural Network vs. Random Moves            |  Neural Network vs. Stockfish (Elo=
 ## Disclaimer 
 This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it)
 
-The main focus was on the neural network part. The Experiments folder has a lot of files that were used to play around with neural networks and get more familiar with it. We decided to not delete it, to give an insight about our learning, but the content of that folder is not to high standarts, has no comments, and will not be prepared by us for the exam. We also decided to play around with reinforcement and tried to implement it also for minichess. This topic was not part of the lecture, so we used ressources on the internet to get familiar with the topic.
+The main focus was on the neural network which returns to probability of winning the chess game, given a certain board state. The `Experiments` folder has a lot of files that were used to play around with neural networks and get more familiar with it. We decided to not delete it, to give an insight about our learning, but the content of that folder is not supposed to be to high standards, nor has it comments, and will not be prepared by us for the exam. We also decided to play around with reinforcement and tried to implement it also for minichess. This topic was not part of the lecture, so we used ressources on the internet to get familiar with the topic.
 
 ## Getting Started
 
