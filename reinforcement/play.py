@@ -1,35 +1,30 @@
+import sys
 import chess.pgn
 import torch
 import random
 import argparse
+from tools import initializeStockfish
 from reinforcement import transformSingleBoardToOneHot, get_highest_legal_q_value_from_predictions
-from stockfishHelper import initializeStockfish
 # Initialize parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", nargs="?",
+parser.add_argument("--model", default="reinforcement.pt", nargs="?",
                     help="Which model to play against (default: reinforcment.pt)")
-parser.add_argument("--turns", nargs="?",
+parser.add_argument("--turns", default=20, type=int, nargs="?",
                     help="How many turns should they each play? (default 20 each)")
 args, unknown = parser.parse_known_args()
 
 # Initialize arguments and parameters
-if args.model is not None:
-    model = torch.load(f"models/{args.model}.pt")
-else:
-    model = torch.load("models/reinforcement.pt")
-
-if args.turns is not None:
-    turns_to_be_played = int(args.turns)
-else:
-    turns_to_be_played = 20
-
+model_name = f"models/{args.model}"
+model = torch.load(model_name)
+turns_to_be_played = args.turns
 
 # Setup board
 initial_fen = "2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1"
 board = chess.Board(initial_fen)
 game = chess.pgn.Game()
 game.headers["FEN"] = initial_fen
-
+game.headers["White"] = "Neural Network Bot"
+game.headers["Black"] = "Random Player"
 
 def printBoard():
     """
@@ -53,10 +48,8 @@ def getBestMove():
     move = get_highest_legal_q_value_from_predictions(board, action_q_values)
     return move
 
-# 5. Game Loop
+
 node = game
-
-
 turns_played = 0
 while not board.is_game_over() and turns_played < turns_to_be_played:
     turns_played += 1

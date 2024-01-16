@@ -6,7 +6,7 @@ import torch
 import random
 import torch.nn as nn
 import torch.optim as optim
-from stockfishHelper import initializeStockfish
+from tools import initializeStockfish
 import numpy as np
 import csv
 import copy
@@ -16,31 +16,37 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--mode", nargs="?",
                     help="Choose to create examples (--mode=examples) with 10 games and 20 turns each "
                          "or train the model (--mode=train) (default: None)")
-parser.add_argument("--epochs", nargs="?",
+parser.add_argument("--epochs", default=10, type=int, nargs="?",
                     help="Number of epochs to train (default: 10)")
-parser.add_argument("--batch", nargs="?",
+parser.add_argument("--batch", default=600, type=int, nargs="?",
                     help="Batch size of training examples used for each epoch (default: 600)")
-parser.add_argument("--name", nargs="?",
+parser.add_argument("--name", default="reinforcement.pt", nargs="?",
                     help="Name to load/save model (default: reinforcement.pt)")
-parser.add_argument("--dataset", nargs="?",
+parser.add_argument("--dataset", default="training.csv", nargs="?",
                     help="Dataset used for training and saving new examples when interacting with the environment (default: training.csv")
-parser.add_argument("--lr", nargs="?",
+parser.add_argument("--lr", default=0.001, type=float, nargs="?",
                     help="Learning rate for the model (default: 0.001)")
-parser.add_argument("--epsilon", nargs="?",
+parser.add_argument("--epsilon", default=0.95, type=float, nargs="?",
                     help="Epsilon for epsilon greedy (default: 0.95)")
-parser.add_argument("--gamma", nargs="?",
+parser.add_argument("--gamma", default=0.95, type=float, nargs="?",
                     help="Gamma to discount future rewards (default: 0.95)")
-parser.add_argument("--enemy-elo", nargs="?",
+parser.add_argument("--enemy-elo", default=1000, type=int, nargs="?",
                     help="Elo of the Stockfish enemy player in the environment (default: 1000)")
 args, unknown = parser.parse_known_args()
+
+#Set arguments passed in call
+n_epochs=args.epochs
+batch_size=args.batch
+csv_file_name=f"data/{args.dataset}"
+model_name=f"models/{args.name}"
+lr=args.lr
+epsilon= args.epsilon
+gamma = args.gamma
+
 evaluator = initializeStockfish() #Best Stockfish possible to make evaluations
 
-# Initialization of parameters at end of file below all methods
-# Initial environment setup
-#csv_file_name = "data/training.csv"
-#epsilon = 0.95 # for epsilon greedy
-#gamma = 0.95 # discount factor so immediate rewards are better than later rewards
-#enemy_player = initializeStockfish(1000)
+# Training or creating new examples is decided in last lines
+
 
 #Explanation of network input and output sizes
 possible_pieces = 5 * 2 + 1 #each player has 5 unique pieces (King, Pawn, Knight, Rook, Bishop) and empty field
@@ -48,6 +54,7 @@ fields_in_chess_board = 8*8 # 1-8 and a-h
 input_size = possible_pieces*fields_in_chess_board # so each field can have 11 unique pieces on it
 no_of_white_pieces = 8 #we play only white, therefore only need white actions
 output_size = no_of_white_pieces * fields_in_chess_board # simplified assumptuion that every piece can move everywhere during the game
+
 #One Hot Encoding of the chess squares to act as input for the Neural Network
 one_hot_mapping = {
     0: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],       # Empty
@@ -68,8 +75,6 @@ def create_starting_board():
     :return: New chess board
     """
     return chess.Board("2rknb2/2pppp2/8/8/8/8/2PPPP2/2RKNB2 w - - 0 1")
-
-
 
 
 def convertPositionToString(fen):
@@ -130,7 +135,7 @@ def get_piece_type_of(piece_name):
             return chess.PAWN
 
 
-def determine_pawn_from_file(file): #TODO only works if there are all starting pawns alive
+def determine_pawn_from_file(file):
     """
     Maps the file to the associated pawn
     :param file: The file of the board
@@ -146,7 +151,7 @@ def determine_pawn_from_file(file): #TODO only works if there are all starting p
         case "f":
             return 3
         case _:
-            return 0 # cant move there anways cuz its not on a pawn file so we dont care about it. just so we dont get errors
+            return 0 # cant move there anways because its not on a pawn file so we dont care about it. just so we dont get errors
 
 
 
@@ -209,13 +214,13 @@ def get_epsilon_greedy_move_from_q_values(state, q_value_action):
 
 def save_example(current_state, action, reward, next_state, action_index, next_state_as_fen):
     """
-    Saves the current example in a csv format
-    :param current_state:
-    :param action:
-    :param reward:
-    :param next_state:
-    :param action_index:
-    :param next_state_as_fen:
+    Saves the current example in a csv format and metadata so when retrieving the data again we dont have to map from one hot to fen for example
+    :param current_state: Current board state as one hot encoded
+    :param action: Action taken in UCI form
+    :param reward: Numerical reward
+    :param next_state: Next state as one hot encoded
+    :param action_index: Index of the action in the output of the Q-Network
+    :param next_state_as_fen: FEN representation of the next state
     :return:
     """
     if reward is not None:
@@ -242,7 +247,6 @@ def determine_reward(before_action, after_action):
     :param after_action: cpawn/mate value after agent executed action
     :return: Reward for the agent
     """
-    # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
     eval_type_before_action = before_action.get('type')
     eval_type_after_action = after_action.get('type')
     eval_value_before_action = before_action.get("value")
@@ -534,47 +538,7 @@ def train(epochs, batch_size, lr):
     torch.save(q_net, model_name)
 
 
-#Set arguments passed in call
-if args.epochs is not None:
-    n_epochs = int(args.epochs)
-else:
-    n_epochs = 10
 
-if args.batch is not None:
-    batch_size = int(args.batch)
-else:
-    batch_size = 600
-
-
-if args.dataset is not None:
-    csv_file_name = f"data/{args.mode}"
-else:
-    csv_file_name = "data/training.csv"
-
-if args.name is not None:
-    model_name = f"models/{args.name}.pt"
-else:
-    model_name = "models/reinforcement.pt"
-
-if args.dataset is not None:
-    csv_file_name = f"data/{args.dataset}.csv"
-else:
-    csv_file_name = "data/training.csv"
-
-if args.lr is not None:
-    lr = float(args.lr)
-else:
-    lr = 0.01
-
-if args.epsilon is not None:
-    epsilon = float(args.epsilon)
-else:
-    epsilon = 0.95
-
-if args.gamma is not None:
-    gamma = float(args.gamma)
-else:
-    gamma = 0.95
 
 if args.enemy_elo is not None:
     enemy_player = initializeStockfish(int(args.enemy_elo))

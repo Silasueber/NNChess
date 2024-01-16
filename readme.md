@@ -14,7 +14,7 @@ EXPERIMENTS NOT OPTIMIZED AND NOT PREPARED
 RL CHERRY ON TOP
 
 ## Getting Started
-
+### Neural Network to predict winning probabilities
 To start creating your own data you can execute the dataCreation.py file.
 
 ```
@@ -32,7 +32,22 @@ The final step is now to play against the trained model, or let the trained mode
 ```
 python play.py --model=models/model.pt --play=y
 ```
+### Reinforcement Learning
+To start creating your own data you can execute the reinforcement.py file with the following parameter:
 
+```
+python reinforcement.py --mode=examples
+```
+After creating the data you can train the model with the train.py file.
+
+```
+python reinforcement.py --mode=train --epochs=10 --batch=600 --name=reinforcement.pt --dataset=training.csv --lr=0.001 --epsilon=0.95 --gamma=0.95 --enemy-elo=1000
+```
+The final step is to let the trained model play against a random player.
+You can limit the number of turns per player with `--turns`.
+```
+python play.py --model=reinforcement.pt --turns=20 
+```
 ### Installing
 
 To install all the libraries that we are using run pip install with the requirements.txt
