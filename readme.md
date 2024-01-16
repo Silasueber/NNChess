@@ -1,20 +1,23 @@
 # Neural Network for Chess Position Evaluation 
 
-In this project we tried to create a simple neural network, which predicts who is currently winning in a chess game. The project also involves creating our own datasets with the help of [Stockfish](https://stockfishchess.org) the strongest chess engine at the time, and the ability to play against the trained neural network. Because this is a student project, and we have limited resources, we decided to focus on "mini chess", a chess variation with less pieces to make the training process easier and faster. 
+In this project we tried to create a simple neural network, which predicts who is currently winning in a chess game. The project also involves creating our own datasets with the help of [Stockfish](https://stockfishchess.org) the strongest chess engine at the time, and the ability to play against the trained neural network. Because this is a student project, and therefore used limited resources, we decided to focus on "mini chess", a chess variation with less pieces to make the training process easier and faster. 
  
 Neural Network vs. Random Moves            |  Neural Network vs. Stockfish (Elo=200)
 :-------------------------:|:-------------------------:
 ![Variation one](images/random.gif)  |  ![Variation two](images/stockfish200.gif)
 
 ## Disclaimer 
-This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it)
+This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it).
 
-HAUPTORJECT MINICHESS
-EXPERIMENTS NOT OPTIMIZED AND NOT PREPARED
-RL CHERRY ON TOP
+The main objective of this project was to train different neural networks to evaluate the winning probability of a chess board and make decisions based on what moves we can do and which move will increase the likelyhood to win. 
 
+We also trained a Deep Q-Network to learn to play chess by itself by applying Reinforcement Learning.
+
+All files in the directory "Experiments" were used to achieve our results but are not commented nor cleaned up but we left in the repository them for purposes of completeness.
 ## Getting Started
 ### Neural Network to predict winning probabilities
+Assuming you are in the `miniChess` directory:
+
 To start creating your own data you can execute the dataCreation.py file.
 
 ```
@@ -33,6 +36,8 @@ The final step is now to play against the trained model, or let the trained mode
 python play.py --model=models/model.pt --play=y
 ```
 ### Reinforcement Learning
+Assuming you are in the `reinforcement` directory:
+
 To start creating your own data you can execute the reinforcement.py file with the following parameter:
 
 ```
