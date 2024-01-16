@@ -6,92 +6,60 @@ from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import argparse
-import sys
 
 # Initialize parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--epoch", nargs="?",
+parser.add_argument("--epoch", nargs="?", default=100, type=int,
                     help="Epoch to train (Default: 100)")
-parser.add_argument("--batch", nargs="?",
-                    help="Batch size (Default: 10)")
-parser.add_argument("--model", nargs="?",
-                    help="Model name on which to train")
-parser.add_argument("--name", nargs="?",
-                    help="Name to save model (Default: minichess.pt)")
-parser.add_argument("--dataset", nargs="?",
+parser.add_argument("--dataset", nargs="?", required=True,
                     help="Dataset for training")
-parser.add_argument("--lr", nargs="?",
-                    help="Learning rate for the model (Default: 0.001)")
+parser.add_argument("--k", nargs="?", type=int, default=3,
+                    help="K to use for k fold (Default: 3)")
 args = parser.parse_args()
 
-if args.dataset != None:
-    dataset = np.loadtxt(args.dataset, delimiter=',')
-else:
-    print("Please provide a dataset (--dataset)")
-    sys.exit()
-
-if args.epoch != None:
-    n_epochs = int(args.epoch)
-else:
-    n_epochs = 100
-
-if args.lr != None:
-    lr = float(args.lr)
-else:
-    lr = 0.001
-
-if args.batch != None:
-    batch_size = int(args.batch)
-else:
-    batch_size = 10
-
-if args.name != None:
-    name = "models/"+args.name
-else:
-    name = "models/minichess.pt"
+# set Hyperparameters
+n_epochs = args.epoch
+k_folds = args.k
+dataset = np.loadtxt(args.dataset, delimiter=",")
 
 models = []
 
-if args.model != None:
-    model = torch.load(args.model)
-else:
-    # define model
-    models.append(nn.Sequential(
-        nn.Linear(65, 32),
-        nn.ReLU(),
-        nn.Linear(32, 16),
-        nn.ReLU(),
-        nn.Linear(16, 1)))
+models.append(nn.Sequential(
+    nn.Linear(65, 32),
+    nn.ReLU(),
+    nn.Linear(32, 16),
+    nn.ReLU(),
+    nn.Linear(16, 1)))
 
-    models.append(nn.Sequential(
-        nn.Linear(65, 128),
-        nn.ReLU(),
-        nn.Linear(128, 64),
-        nn.ReLU(),
-        nn.Linear(64, 1)))
+models.append(nn.Sequential(
+    nn.Linear(65, 128),
+    nn.ReLU(),
+    nn.Linear(128, 64),
+    nn.ReLU(),
+    nn.Linear(64, 1)))
 
-    models.append(nn.Sequential(
-        nn.Linear(65, 256),
-        nn.ReLU(),
-        nn.Linear(256, 128),
-        nn.ReLU(),
-        nn.Linear(128, 64),
-        nn.ReLU(),
-        nn.Linear(64, 1)))
+models.append(nn.Sequential(
+    nn.Linear(65, 256),
+    nn.ReLU(),
+    nn.Linear(256, 128),
+    nn.ReLU(),
+    nn.Linear(128, 64),
+    nn.ReLU(),
+    nn.Linear(64, 1)))
 
-    models.append(nn.Sequential(
-        nn.Linear(65, 32),
-        nn.ReLU(),
-        nn.Linear(32, 24),
-        nn.ReLU(),
-        nn.Linear(24, 8),
-        nn.ReLU(),
-        nn.Linear(8, 1)))
+models.append(nn.Sequential(
+    nn.Linear(65, 32),
+    nn.ReLU(),
+    nn.Linear(32, 24),
+    nn.ReLU(),
+    nn.Linear(24, 8),
+    nn.ReLU(),
+    nn.Linear(8, 1)))
 
-    models.append(nn.Sequential(
-        nn.Linear(65, 16),
-        nn.ReLU(),
-        nn.Linear(16, 1)))
+models.append(nn.Sequential(
+    nn.Linear(65, 16),
+    nn.ReLU(),
+    nn.Linear(16, 1)))
 
 X = dataset[:, :65]
 y = dataset[:, 65:]
@@ -101,7 +69,6 @@ y = torch.tensor(y, dtype=torch.float32)
 
 
 # K-fold cross-validation
-k_folds = 3  # You can adjust this value
 kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
 
 for learning_rate in [0.0001, 0.001, 0.1]:
@@ -123,7 +90,7 @@ for learning_rate in [0.0001, 0.001, 0.1]:
                 y_val = y_val.detach().clone().float()
 
                 loss_fn = nn.MSELoss()
-                optimizer = optim.Adam(model.parameters(), lr=lr)
+                optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
                 dataset_train = TensorDataset(X_train, y_train)
                 dataloader_train = DataLoader(

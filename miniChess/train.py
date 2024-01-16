@@ -23,30 +23,33 @@ parser.add_argument("--dataset", required=True,
                     help="Dataset for training")
 parser.add_argument("--lr", type=float, default=0.001,
                     help="Learning rate for the model (Default: 0.001)")
+parser.add_argument("--layers", default="256,128,64",
+                    help="The structure of the model (Default: 256,128,64)")
 args = parser.parse_args()
 
 # Load dataset
-dataset = np.loadtxt(f"{args.dataset}", delimiter=',')
+dataset = np.loadtxt(args.dataset, delimiter=',')
 
 # Set hyperparameters
 n_epochs = args.epoch
+model_structure = args.layers
 lr = args.lr
 batch_size = args.batch
-name = f"{args.name}"
+name = args.name
 
 # Load or initialize model
 if args.model:
     model = torch.load(f"{args.model}")
 else:
     # Define model architecture
-    model = nn.Sequential(
-        nn.Linear(65, 256),
-        nn.ReLU(),
-        nn.Linear(256, 128),
-        nn.ReLU(),
-        nn.Linear(128, 64),
-        nn.ReLU(),
-        nn.Linear(64, 1))
+    model = nn.Sequential()
+    last_layer = 65
+    for layer in model_structure.split(","):
+        model.append(nn.Linear(last_layer, int(layer)))
+        last_layer = int(layer)
+        model.append(nn.ReLU())
+    model.append(nn.Linear(last_layer, 1))
+    print(model)
 
 # Split dataset into train and eval
 X_train, X_eval, y_train, y_eval = train_test_split(
@@ -112,10 +115,6 @@ for epoch in range(n_epochs):
 
 # Save the trained model
 torch.save(model, name)
-
-
-xpoints = np.array([1, 8])
-ypoints = np.array([3, 10])
 
 # Plot loss curves
 plt.plot(train_loss_values, label='Train Loss')

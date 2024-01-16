@@ -916,3 +916,29 @@ Average Mean Absolute Error (MAE): 0.1226
 0.1 10 Average R-squared (R2): 0.6597
 
 Fold 1/3
+
+
+
+
+
+CHESS GAME:
+
+vs random without checkmate check:
+wins: 59
+loss: 1 
+draws: 40 
+
+vs random with checkmate check:
+wins: 68
+loss: 0 
+draws: 32
+
+vs elo 50 without checkmate check:
+wins: 0
+loss: 0 
+draws: 100
+
+vs elo 50 with checkmate check:
+wins: 0
+loss: 0 
+draws: 100

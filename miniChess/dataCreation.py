@@ -30,26 +30,31 @@ stockfish_black = initializeStockfish()
 
 board = chess.Board()
 
+# use draw counter to mininize dead draws in the dataset
 draw_counter = 0
-
-# Play moves
 
 
 def playMove(move):
+    """
+    Plays the moves for the board of the chess library and the board of the stockfish library
+
+    :param1 move: move to make on the board
+    """
     stockfish_white.make_moves_from_current_position([move])
     stockfish_black.make_moves_from_current_position([move])
     board.push(chess.Move.from_uci(str(move)))
 
 
 def createDataEntry():
+    """
+    Creates a dataentry for the current chess position
+    """
     if board.fen() not in position_evaluated:
         position_evaluated.append(board.fen())
         position = convertPositionToString(board)
         print(board)
-        # Dataset three with cpawn value for position [limited at -10 and +10]
         csv_path = name
         winner = getCpawnValue()
-        # if (winner < 0.5 and winner > 0.1) or (winner > 0.5 and winner < 0.9):
         line = position+","+str(winner)
         try:
             with open(csv_path, 'a', newline='') as csv_file:
@@ -60,6 +65,10 @@ def createDataEntry():
 
 
 def getCpawnValue():
+    """
+    Converts the cpawn value of stockfish to a cpawn value in the area of 0 to 1
+    :return: returns the new cpawn value
+    """
     global draw_counter
     eval = stockfish_black.get_evaluation()
     eval_type = eval.get('type')
@@ -69,6 +78,7 @@ def getCpawnValue():
         else:
             return 0
     K = 10
+    # Converts the cpawn value of stockfish into the area of 0 to 1
     try:
         eval_value = 1/(1+(math.pow(10, -(eval.get("value")/K))))
     except OverflowError:
@@ -79,6 +89,12 @@ def getCpawnValue():
 
 
 def createRandomFen(num_moves):
+    """
+    Creates a random fen position for the chess board
+
+    :param1 num_moves: random moves to make to create the fen position
+    :return: random fen position
+    """
     board = chess.Board(position)
     for i in range(num_moves):
         if board.is_game_over():
@@ -90,11 +106,16 @@ def createRandomFen(num_moves):
         except:
             print("Couldnt make move")
     fen_position = board.fen()
-    print(fen_position)
     return fen_position
 
 
 def playGame(random_moves=0.5, moves=5):
+    """
+    Plays the game
+
+    :param1 random_moves: how many moves should be random istead of using stockfish
+    :param2 moves: how many moves to play from the position
+    """
     global draw_counter
     draw_counter = 0
     while moves > 0 and stockfish_white.get_best_move():
@@ -128,12 +149,18 @@ def playGame(random_moves=0.5, moves=5):
 
 
 def setPosition(position):
+    """
+    Set the position for all the boards
+
+    :param1 position: the fen position for the boards
+    """
     stockfish_black.set_fen_position(position)
     stockfish_white.set_fen_position(position)
     board.set_fen(position)
 
 
-for i in range(100000):
+# Main Loop
+for i in range(amount_of_games):
     print("Current Game: " + str(i+1))
     for x in range(5):
         setPosition(createRandomFen(x))
