@@ -135,73 +135,52 @@ def printBoard():
 
 
 node = game
-# TODO Delete only for visualize
-random_moves = False
-nn_wins = 0
-random_wins = 0
-game_to_play = 100
+board = chess.Board(initial_fen)
+stockfish.set_fen_position(initial_fen)
+node = game
+# Main game loop
+while not board.is_game_over():
 
-for i in range(game_to_play):
-    print("Playing Game " + str(i))
-    board = chess.Board(initial_fen)
-    stockfish.set_fen_position(initial_fen)
-    node = game
-    # Main game loop
-    while not board.is_game_over():
+    # Bot move
+    move = getBestMove()
+    printBoard()
+    node = node.add_variation(move)
+    board.push(move)
+    if not random_moves:
+        stockfish.make_moves_from_current_position([move])
 
-        # Bot move
-        move = getBestMove()
+    if play:
+        # Human move
         printBoard()
-        node = node.add_variation(move)
-        board.push(move)
-        if not random_moves:
-            stockfish.make_moves_from_current_position([move])
-
-        if play:
-            # Human move
-            printBoard()
-            if not board.is_game_over():
-                correct_move = False
-                while not correct_move:
-                    move_str = input("Your move (ex. e2e4): ")
-                    try:
-                        board.push_uci(move_str)
-                        move = chess.Move.from_uci(str(move_str))
-                        if not random_moves:
-                            stockfish.make_moves_from_current_position([move])
-                        node = node.add_variation(move)
-                        correct_move = True
-                        printBoard()
-                    except:
-                        print("Invalid move!")
-        else:
-            # Random move
-            if not board.is_game_over():
-                if random_moves:
-                    legal_moves = [move for move in board.legal_moves]
-                    random_move = random.choice(legal_moves)
-                    node = node.add_variation(random_move)
-                    board.push(random_move)
-                else:
-                    move = stockfish.get_best_move()
-                    move = chess.Move.from_uci(str(move))
-                    board.push(move)
-                    stockfish.make_moves_from_current_position([move])
+        if not board.is_game_over():
+            correct_move = False
+            while not correct_move:
+                move_str = input("Your move (ex. e2e4): ")
+                try:
+                    board.push_uci(move_str)
+                    move = chess.Move.from_uci(str(move_str))
+                    if not random_moves:
+                        stockfish.make_moves_from_current_position([move])
                     node = node.add_variation(move)
-    outcome = board.outcome()
-    if outcome:
-        if outcome.winner == chess.WHITE:
-            nn_wins += 1
-            print("win")
-        elif outcome.winner == chess.BLACK:
-            random_wins += 1
-            print("loss")
-        else:
-            print("draw")
-    # Print the PGN
-            # TODO REMOVE COMMENTS
-    # print(game)
-    # print(" ")
-    # print("Open https://www.chess.com/analysis?tab=analysis -> paste output in 'Load From FEN/PGN(s)'")
+                    correct_move = True
+                    printBoard()
+                except:
+                    print("Invalid move!")
+    else:
+        # Random move
+        if not board.is_game_over():
+            if random_moves:
+                legal_moves = [move for move in board.legal_moves]
+                random_move = random.choice(legal_moves)
+                node = node.add_variation(random_move)
+                board.push(random_move)
+            else:
+                move = stockfish.get_best_move()
+                move = chess.Move.from_uci(str(move))
+                board.push(move)
+                stockfish.make_moves_from_current_position([move])
+                node = node.add_variation(move)
 
-print(nn_wins, random_wins)
+print(game)
+print(" ")
+print("Open https://www.chess.com/analysis?tab=analysis -> paste output in 'Load From FEN/PGN(s)'")
