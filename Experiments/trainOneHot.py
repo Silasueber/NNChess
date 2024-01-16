@@ -20,6 +20,10 @@ one_hot_mapping = {
     -10: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],  # Black Queen
     -1000: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]  # Black King
 }
+train = True
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+modelName = "models/one_hot.pt"
+
 def transformSingleBoardToOneHot(board):
     newBoardRepresentation = np.array([board[0]]) # First entry is whose turn it is
     for field in board[1:]:
@@ -27,24 +31,31 @@ def transformSingleBoardToOneHot(board):
 
     return newBoardRepresentation
 def transformBoardsCsvToOneHot(boards):
+    oneHotEncodedValuesFileName = "data/p2_one_hot_encoded.npy"
+    if path.isfile(oneHotEncodedValuesFileName):
+        with open(oneHotEncodedValuesFileName, 'rb') as f:
+            return np.load(f)
     newBoardsRepresentation = np.array([])
     for board in boards:
         newBoardRepresentation = transformSingleBoardToOneHot(board)
         newBoardsRepresentation = np.append(newBoardsRepresentation, newBoardRepresentation)
 
     newBoardsRepresentation = newBoardsRepresentation.reshape(len(boards), 641) #641 = 1+64*10 because one hot vector has 10 elements
+    with open(oneHotEncodedValuesFileName, "wb") as f:
+        np.save(f, newBoardsRepresentation)
     return newBoardsRepresentation
 
-train = True
-modelName = "models/one_hot.pt"
+
 if train:
-    dataset = np.loadtxt('data/p2.csv', delimiter=',') # use same dataset because no reason to change
+    print('Using device:', device)
+    dataset = np.loadtxt('data/p2_small.csv' if device.type == 'cpu' else 'data/p2.csv', delimiter=',') # use same dataset because no reason to change
     X = dataset[:, :65]
     y = dataset[:, 65:]
     X = transformBoardsCsvToOneHot(X)
     # Convert to tensors
     X = torch.tensor(X, dtype=torch.float32)
-    y = torch.tensor(y, dtype=torch.float32)
+    y_one_hot = torch.tensor(y, dtype=torch.float32)
+    y_class_indices = torch.argmax(y_one_hot, dim=1) #pytorch needs integer values for nn.CrossEntropyLoss
 
     # define model
     noOfCpawnValues = 5
@@ -59,13 +70,14 @@ if train:
 
     # load model:
     if path.isfile(modelName):
-        model = torch.load(modelName)
+        model = torch.load(modelName, map_location=device)
 
-    loss_fn = nn.MSELoss()  # BECAUSE ALL LABELS ARE EITHER 0 OR 1
+    model = model.to(device)
+
+    loss_fn = nn.CrossEntropyLoss() # TODO still not sure? habs auch nochmal gegoogelt
     optimizer = optim.Adam(model.parameters(), lr=0.0001)  # Adam optimizer
-
-    batch_size = 10
-    dataset = TensorDataset(X, y)
+    batch_size = 100
+    dataset = TensorDataset(X, y_class_indices)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     n_epochs = 2000
@@ -73,6 +85,7 @@ if train:
         avg_loss = 0
         amount = 0
         for Xbatch, ybatch in dataloader:
+            Xbatch, ybatch = Xbatch.to(device), ybatch.to(device)
             y_pred = model(Xbatch)
             loss = loss_fn(y_pred, ybatch)
             avg_loss += loss.item()
@@ -87,7 +100,7 @@ if train:
     model = torch.load(modelName)
     model.eval()
 else:
-    model = torch.load(modelName)
+    model = torch.load(modelName, map_location=device)
 
 whiteWinning = "3k4/8/3K4/8/8/8/8/Q7 w - - 0 2"
 blackWinning = "8/2k5/8/2q5/8/8/7R/7K w - - 0 1"
@@ -115,8 +128,10 @@ def testFenPosition(fen):
     test = [int(t) for t in test]
     test = transformSingleBoardToOneHot(test)
     test = torch.tensor(test, dtype=torch.float32)
+    test.to(device)
     predictions = model(test)
     print(predictions)
 
-testFenPosition(whiteWinning)
-testFenPosition(blackWinning)
+with torch.no_grad(): # uses less memory, random optimization when doing inference
+    testFenPosition(whiteWinning)
+    testFenPosition(blackWinning)

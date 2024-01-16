@@ -1,6 +1,6 @@
 import chess
 import torch
-from chessBot import getBestMove
+from Experiments.chessBot import getBestMove
 
 board = chess.Board("6k1/3Q4/6K1/8/8/8/8/8 b - - 0 1")
 model = torch.load("models/p3_2.pt")
@@ -23,4 +23,3 @@ while not board.is_game_over():
     except:
         print("Invalid move!")
     board.push(getBestMove(board))
-    
