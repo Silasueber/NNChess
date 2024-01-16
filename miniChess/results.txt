@@ -1,0 +1,918 @@
+Epoch=1000
+dataset = final.csv
+lr= 0.001/0.01/0.1
+batch_size = 1000/100/10
+
+MSE: If your primary concern is to minimize the impact of large errors and outliers.
+MAE: If you want a metric that is robust to outliers and provides a simple, interpretable measure of average error.
+R2: If you are interested in understanding the overall explanatory power of your model. R2 provides a measure of how well your model explains the variability in the target variable.
+
+lr 0.001 batch_size = 1000
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0607
+        Average Mean Absolute Error (MAE): 0.1531
+        Average R-squared (R2): 0.1373
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0584
+        Average Mean Absolute Error (MAE): 0.1493
+        Average R-squared (R2): 0.1699
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0519
+        Average Mean Absolute Error (MAE): 0.1443
+        Average R-squared (R2): 0.2620
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0680
+        Average Mean Absolute Error (MAE): 0.1469
+        Average R-squared (R2): 0.0357
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0753
+        Average Mean Absolute Error (MAE): 0.1503
+        Average R-squared (R2): -0.0658
+
+## lr 0.01 batch_size = 1000 ## 
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0990
+        Average Mean Absolute Error (MAE): 0.1687
+        Average R-squared (R2): -0.4013
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0827
+        Average Mean Absolute Error (MAE): 0.1765
+        Average R-squared (R2): -0.1677
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0748
+        Average Mean Absolute Error (MAE): 0.1702
+        Average R-squared (R2): -0.0573
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0720
+        Average Mean Absolute Error (MAE): 0.1690
+        Average R-squared (R2): -0.0194
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+       Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0731
+        Average Mean Absolute Error (MAE): 0.1685
+        Average R-squared (R2): -0.0343
+
+## lr 0.1 batch_size = 1000 ## 
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0708
+        Average Mean Absolute Error (MAE): 0.1965
+        Average R-squared (R2): -0.0008
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1404
+        Average Mean Absolute Error (MAE): 0.2048
+        Average R-squared (R2): -0.9859
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0450
+        Average Mean Absolute Error (MAE): 0.1303
+        Average R-squared (R2): 0.3561
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1057
+        Average Mean Absolute Error (MAE): 0.2005
+        Average R-squared (R2): -0.4948
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0988
+        Average Mean Absolute Error (MAE): 0.1998
+        Average R-squared (R2): -0.3967
+
+## lr 0.001 batch_size = 100 ## 
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0625
+        Average Mean Absolute Error (MAE): 0.1567
+        Average R-squared (R2): 0.1071
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0497
+        Average Mean Absolute Error (MAE): 0.1420
+        Average R-squared (R2): 0.2906
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0450
+        Average Mean Absolute Error (MAE): 0.1303
+        Average R-squared (R2): 0.3561
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0454
+        Average Mean Absolute Error (MAE): 0.1344
+        Average R-squared (R2): 0.3516
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0488
+        Average Mean Absolute Error (MAE): 0.1397
+        Average R-squared (R2): 0.3041
+
+## lr 0.01 batch_size = 100 ## 
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1628
+        Average Mean Absolute Error (MAE): 0.1631
+        Average R-squared (R2): -1.3374
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1104
+        Average Mean Absolute Error (MAE): 0.1584
+        Average R-squared (R2): -0.5811
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1132
+        Average Mean Absolute Error (MAE): 0.1683
+        Average R-squared (R2): -0.6225
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0981
+        Average Mean Absolute Error (MAE): 0.1648
+        Average R-squared (R2): -0.4036
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0996
+        Average Mean Absolute Error (MAE): 0.1625
+        Average R-squared (R2): -0.4255
+
+## lr 0.1 batch_size = 100 ## 
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0729
+        Average Mean Absolute Error (MAE): 0.2045
+        Average R-squared (R2): -0.0300
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0723
+        Average Mean Absolute Error (MAE): 0.2028
+        Average R-squared (R2): -0.0221
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1004
+        Average Mean Absolute Error (MAE): 0.2062
+        Average R-squared (R2): -0.4322
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0934
+        Average Mean Absolute Error (MAE): 0.2058
+        Average R-squared (R2): -0.3296
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0892
+        Average Mean Absolute Error (MAE): 0.2055
+        Average R-squared (R2): -0.2687
+
+## lr 0.001 batch_size = 10 ## 
+1. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0729
+        Average Mean Absolute Error (MAE): 0.2045
+        Average R-squared (R2): -0.0300
+
+2. nn.Sequential(
+        nn.Linear(65, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0723
+        Average Mean Absolute Error (MAE): 0.2028
+        Average R-squared (R2): -0.0221
+
+3. nn.Sequential(
+        nn.Linear(65, 256),
+        nn.ReLU(),
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.1004
+        Average Mean Absolute Error (MAE): 0.2062
+        Average R-squared (R2): -0.4322
+
+4. nn.Sequential(
+        nn.Linear(65, 32),
+        nn.ReLU(),
+        nn.Linear(32, 24),
+        nn.ReLU(),
+        nn.Linear(24, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0934
+        Average Mean Absolute Error (MAE): 0.2058
+        Average R-squared (R2): -0.3296
+
+5. nn.Sequential(
+        nn.Linear(65, 16),
+        nn.ReLU(),
+        nn.Linear(16, 1))
+
+        Average Metrics Across 3 Folds:
+        Average Mean Squared Error (MSE): 0.0892
+        Average Mean Absolute Error (MAE): 0.2055
+        Average R-squared (R2): -0.2687
+
+
+
+1000 epochs 
+
+(base) MacBook-Pro:miniChess silasueberschaer$ python3 trainValidation.py --dataset=data/benni23.csv --epoch=1000
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0865, MAE: 0.1890, R2: 0.1158
+Fold 2/3
+Fold 2 Metrics - MSE: 0.1664, MAE: 0.1875, R2: -0.7937
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0507, MAE: 0.1674, R2: 0.4649
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.1012
+Average Mean Absolute Error (MAE): 0.1813
+0.001 1000 Average R-squared (R2): -0.0710
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0758, MAE: 0.1937, R2: 0.2251
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0692, MAE: 0.1807, R2: 0.2542
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0528, MAE: 0.1725, R2: 0.4429
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0659
+Average Mean Absolute Error (MAE): 0.1823
+0.001 1000 Average R-squared (R2): 0.3074
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0642, MAE: 0.1799, R2: 0.3439
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0961, MAE: 0.1585, R2: -0.0355
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0279, MAE: 0.1244, R2: 0.7055
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0627
+Average Mean Absolute Error (MAE): 0.1543
+0.001 1000 Average R-squared (R2): 0.3380
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0605, MAE: 0.1873, R2: 0.3811
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0855, MAE: 0.1807, R2: 0.0780
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0565, MAE: 0.1755, R2: 0.4037
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0675
+Average Mean Absolute Error (MAE): 0.1812
+0.001 1000 Average R-squared (R2): 0.2876
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0760, MAE: 0.1952, R2: 0.2228
+Fold 2/3
+Fold 2 Metrics - MSE: 0.1512, MAE: 0.1943, R2: -0.6298
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0547, MAE: 0.1788, R2: 0.4232
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0940
+Average Mean Absolute Error (MAE): 0.1895
+0.001 1000 Average R-squared (R2): 0.0054
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0635, MAE: 0.1789, R2: 0.3508
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0775, MAE: 0.1755, R2: 0.1646
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0489, MAE: 0.1681, R2: 0.4839
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0633
+Average Mean Absolute Error (MAE): 0.1742
+0.001 100 Average R-squared (R2): 0.3331
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0584, MAE: 0.1820, R2: 0.4034
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0596, MAE: 0.1596, R2: 0.3573
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0407, MAE: 0.1466, R2: 0.5707
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0529
+Average Mean Absolute Error (MAE): 0.1627
+0.001 100 Average R-squared (R2): 0.4438
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0492, MAE: 0.1583, R2: 0.4968
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0228, MAE: 0.1086, R2: 0.7544
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0152, MAE: 0.0869, R2: 0.8396
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0291
+Average Mean Absolute Error (MAE): 0.1179
+0.001 100 Average R-squared (R2): 0.6969
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0619, MAE: 0.1827, R2: 0.3670
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0888, MAE: 0.1828, R2: 0.0433
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0528, MAE: 0.1673, R2: 0.4433
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0678
+Average Mean Absolute Error (MAE): 0.1776
+0.001 100 Average R-squared (R2): 0.2845
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0662, MAE: 0.1839, R2: 0.3230
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0822, MAE: 0.1859, R2: 0.1134
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0511, MAE: 0.1732, R2: 0.4609
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0665
+Average Mean Absolute Error (MAE): 0.1810
+0.001 100 Average R-squared (R2): 0.2991
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0582, MAE: 0.1748, R2: 0.4052
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0422, MAE: 0.1537, R2: 0.5448
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0395, MAE: 0.1469, R2: 0.5837
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0466
+Average Mean Absolute Error (MAE): 0.1584
+0.001 10 Average R-squared (R2): 0.5112
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0458, MAE: 0.1511, R2: 0.5321
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0265, MAE: 0.1110, R2: 0.7149
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0216, MAE: 0.1009, R2: 0.7726
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0313
+Average Mean Absolute Error (MAE): 0.1210
+0.001 10 Average R-squared (R2): 0.6732
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0569, MAE: 0.1768, R2: 0.4184
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0619, MAE: 0.1687, R2: 0.3322
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0474, MAE: 0.1610, R2: 0.5000
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0554
+Average Mean Absolute Error (MAE): 0.1688
+0.001 10 Average R-squared (R2): 0.4169
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0717, MAE: 0.1905, R2: 0.2668
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0776, MAE: 0.1849, R2: 0.1633
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0547, MAE: 0.1762, R2: 0.4233
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0680
+Average Mean Absolute Error (MAE): 0.1839
+0.001 10 Average R-squared (R2): 0.2845
+
+MISSING
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0393, MAE: 0.1432, R2: 0.5986
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0379, MAE: 0.1424, R2: 0.5919
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0384, MAE: 0.1459, R2: 0.5949
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0385
+Average Mean Absolute Error (MAE): 0.1438
+0.01 1000 Average R-squared (R2): 0.5951
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0299, MAE: 0.1223, R2: 0.6942
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0260, MAE: 0.1138, R2: 0.7193
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0248, MAE: 0.1124, R2: 0.7384
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0269
+Average Mean Absolute Error (MAE): 0.1162
+0.01 1000 Average R-squared (R2): 0.7173
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0080, MAE: 0.0506, R2: 0.9181
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0046, MAE: 0.0400, R2: 0.9508
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0064, MAE: 0.0481, R2: 0.9320
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0063
+Average Mean Absolute Error (MAE): 0.0462
+0.01 1000 Average R-squared (R2): 0.9336
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0300, MAE: 0.1262, R2: 0.6933
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0413, MAE: 0.1373, R2: 0.5552
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0364, MAE: 0.1397, R2: 0.6157
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0359
+Average Mean Absolute Error (MAE): 0.1344
+0.01 1000 Average R-squared (R2): 0.6214
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0471, MAE: 0.1645, R2: 0.5181
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0477, MAE: 0.1597, R2: 0.4860
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0450, MAE: 0.1621, R2: 0.5257
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0466
+Average Mean Absolute Error (MAE): 0.1621
+0.01 1000 Average R-squared (R2): 0.5099
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0412, MAE: 0.1501, R2: 0.5785
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0437, MAE: 0.1525, R2: 0.5286
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0498, MAE: 0.1562, R2: 0.4749
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0449
+Average Mean Absolute Error (MAE): 0.1529
+0.01 100 Average R-squared (R2): 0.5273
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0257, MAE: 0.1142, R2: 0.7372
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0230, MAE: 0.1069, R2: 0.7526
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0208, MAE: 0.1057, R2: 0.7807
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0232
+Average Mean Absolute Error (MAE): 0.1089
+0.01 100 Average R-squared (R2): 0.7568
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0071, MAE: 0.0509, R2: 0.9270
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0062, MAE: 0.0467, R2: 0.9333
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0066, MAE: 0.0510, R2: 0.9301
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0067
+Average Mean Absolute Error (MAE): 0.0495
+0.01 100 Average R-squared (R2): 0.9302
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0387, MAE: 0.1407, R2: 0.6041
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0432, MAE: 0.1488, R2: 0.5346
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0379, MAE: 0.1424, R2: 0.5998
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0399
+Average Mean Absolute Error (MAE): 0.1439
+0.01 100 Average R-squared (R2): 0.5795
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0495, MAE: 0.1680, R2: 0.4940
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0642, MAE: 0.1682, R2: 0.3078
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0477, MAE: 0.1664, R2: 0.4973
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0538
+Average Mean Absolute Error (MAE): 0.1675
+0.01 100 Average R-squared (R2): 0.4330
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0519, MAE: 0.1635, R2: 0.4692
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0584, MAE: 0.1625, R2: 0.3704
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0477, MAE: 0.1595, R2: 0.4972
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0527
+Average Mean Absolute Error (MAE): 0.1618
+0.01 10 Average R-squared (R2): 0.4456
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0335, MAE: 0.1354, R2: 0.6579
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0330, MAE: 0.1328, R2: 0.6439
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0353, MAE: 0.1348, R2: 0.6282
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0339
+Average Mean Absolute Error (MAE): 0.1343
+0.01 10 Average R-squared (R2): 0.6433
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0220, MAE: 0.0979, R2: 0.7747
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0182, MAE: 0.0905, R2: 0.8035
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0166, MAE: 0.0872, R2: 0.8249
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0190
+Average Mean Absolute Error (MAE): 0.0919
+0.01 10 Average R-squared (R2): 0.8010
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0477, MAE: 0.1571, R2: 0.5128
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0583, MAE: 0.1615, R2: 0.3718
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0438, MAE: 0.1530, R2: 0.5384
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0499
+Average Mean Absolute Error (MAE): 0.1572
+0.01 10 Average R-squared (R2): 0.4743
+
+Fold 1/3
+MISSING
+
+
+
+
+
+
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0863, MAE: 0.1909, R2: 0.1179
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0630, MAE: 0.1841, R2: 0.3205
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0536, MAE: 0.1739, R2: 0.4350
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0676
+Average Mean Absolute Error (MAE): 0.1830
+0.1 1000 Average R-squared (R2): 0.2911
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0643, MAE: 0.1845, R2: 0.3429
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0770, MAE: 0.1776, R2: 0.1695
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0499, MAE: 0.1664, R2: 0.4739
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0637
+Average Mean Absolute Error (MAE): 0.1762
+0.1 1000 Average R-squared (R2): 0.3288
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0629, MAE: 0.1775, R2: 0.3575
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0505, MAE: 0.1568, R2: 0.4556
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0294, MAE: 0.1289, R2: 0.6904
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0476
+Average Mean Absolute Error (MAE): 0.1544
+0.1 1000 Average R-squared (R2): 0.5012
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0655, MAE: 0.1894, R2: 0.3301
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0848, MAE: 0.1803, R2: 0.0863
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0492, MAE: 0.1635, R2: 0.4806
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0665
+Average Mean Absolute Error (MAE): 0.1777
+0.1 1000 Average R-squared (R2): 0.2990
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0794, MAE: 0.1920, R2: 0.1882
+Fold 2/3
+Fold 2 Metrics - MSE: 0.1073, MAE: 0.1899, R2: -0.1570
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0521, MAE: 0.1776, R2: 0.4508
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0796
+Average Mean Absolute Error (MAE): 0.1865
+0.1 1000 Average R-squared (R2): 0.1607
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.1031, MAE: 0.1864, R2: -0.0538
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0683, MAE: 0.1786, R2: 0.2633
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0487, MAE: 0.1669, R2: 0.4868
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0734
+Average Mean Absolute Error (MAE): 0.1773
+0.1 100 Average R-squared (R2): 0.2321
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0561, MAE: 0.1747, R2: 0.4268
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0472, MAE: 0.1601, R2: 0.4913
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0345, MAE: 0.1406, R2: 0.6357
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0459
+Average Mean Absolute Error (MAE): 0.1585
+0.1 100 Average R-squared (R2): 0.5179
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0483, MAE: 0.1520, R2: 0.5065
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0260, MAE: 0.1158, R2: 0.7194
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0163, MAE: 0.0919, R2: 0.8286
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0302
+Average Mean Absolute Error (MAE): 0.1199
+0.1 100 Average R-squared (R2): 0.6848
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0662, MAE: 0.1753, R2: 0.3237
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0668, MAE: 0.1662, R2: 0.2795
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0456, MAE: 0.1535, R2: 0.5195
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0595
+Average Mean Absolute Error (MAE): 0.1650
+0.1 100 Average R-squared (R2): 0.3742
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0595, MAE: 0.1826, R2: 0.3915
+Fold 2/3
+Fold 2 Metrics - MSE: 0.1152, MAE: 0.1852, R2: -0.2413
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0523, MAE: 0.1729, R2: 0.4487
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0756
+Average Mean Absolute Error (MAE): 0.1802
+0.1 100 Average R-squared (R2): 0.1996
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0671, MAE: 0.1860, R2: 0.3141
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0652, MAE: 0.1748, R2: 0.2976
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0508, MAE: 0.1667, R2: 0.4645
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0610
+Average Mean Absolute Error (MAE): 0.1758
+0.1 10 Average R-squared (R2): 0.3588
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0556, MAE: 0.1740, R2: 0.4318
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0902, MAE: 0.1597, R2: 0.0272
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0352, MAE: 0.1397, R2: 0.6289
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0603
+Average Mean Absolute Error (MAE): 0.1578
+0.1 10 Average R-squared (R2): 0.3626
+
+Fold 1/3
+Fold 1 Metrics - MSE: 0.0452, MAE: 0.1466, R2: 0.5383
+Fold 2/3
+Fold 2 Metrics - MSE: 0.0293, MAE: 0.1193, R2: 0.6838
+Fold 3/3
+Fold 3 Metrics - MSE: 0.0231, MAE: 0.1020, R2: 0.7568
+Average Metrics Across 3 Folds:
+Average Mean Squared Error (MSE): 0.0325
+Average Mean Absolute Error (MAE): 0.1226
+0.1 10 Average R-squared (R2): 0.6597
+
+Fold 1/3
