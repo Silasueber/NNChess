@@ -42,10 +42,13 @@ def getBestMove():
     """
     board_one_hot = transformSingleBoardToOneHot(board)
     X = torch.tensor(board_one_hot, dtype=torch.float32)
-    #predict q-values
+    # predict q-values
     action_q_values = model(X)
     # select highest legal q value
     move = get_highest_legal_q_value_from_predictions(board, action_q_values)
+    if move is None:
+    # occurs only if legal_moves has a single move? just play that move then?
+        return list(board.legal_moves)[0]
     return move
 
 
