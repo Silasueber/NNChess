@@ -9,6 +9,10 @@ Neural Network vs. Random Moves            |  Neural Network vs. Stockfish (Elo=
 ## Disclaimer 
 This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it)
 
+HAUPTORJECT MINICHESS
+EXPERIMENTS NOT OPTIMIZED AND NOT PREPARED
+RL CHERRY ON TOP
+
 ## Getting Started
 
 To start creating your own data you can execute the dataCreation.py file.

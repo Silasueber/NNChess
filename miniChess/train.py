@@ -8,89 +8,70 @@ import sys
 
 # Initialize parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--epoch", nargs="?",
-                    help="Epoch to train (Default: 100)")
-parser.add_argument("--batch", nargs="?",
+parser.add_argument("--epoch", type=int, default=100,
+                    help="Number of epochs to train (Default: 100)")
+parser.add_argument("--batch", type=int, default=10,
                     help="Batch size (Default: 10)")
 parser.add_argument("--model", nargs="?",
                     help="Model name on which to train")
-parser.add_argument("--name", nargs="?",
+parser.add_argument("--name", default="minichess_two.pt",
                     help="Name to save model (Default: minichess.pt)")
-parser.add_argument("--dataset", nargs="?",
+parser.add_argument("--dataset", required=True,
                     help="Dataset for training")
-parser.add_argument("--lr", nargs="?",
+parser.add_argument("--lr", type=float, default=0.001,
                     help="Learning rate for the model (Default: 0.001)")
 args = parser.parse_args()
 
-if args.dataset != None:
-    dataset = np.loadtxt(args.dataset, delimiter=',')
-else:
-    print("Please provide a dataset (--dataset)")
-    sys.exit()
+# Load dataset
+dataset = np.loadtxt(f"{args.dataset}", delimiter=',')
 
-if args.epoch != None:
-    n_epochs = int(args.epoch)
-else:
-    n_epochs = 100
+# Set hyperparameters
+n_epochs = args.epoch
+lr = args.lr
+batch_size = args.batch
+name = f"{args.name}"
 
-if args.lr != None:
-    lr = float(args.lr)
+# Load or initialize model
+if args.model:
+    model = torch.load(f"{args.model}")
 else:
-    lr = 0.001
-
-if args.batch != None:
-    batch_size = int(args.batch)
-else:
-    batch_size = 10
-
-if args.name != None:
-    name = "models/"+args.name
-else:
-    name = "models/minichess.pt"
-
-if args.model != None:
-    model = torch.load(args.model)
-else:
-    # define model
+    # Define model architecture
     model = nn.Sequential(
-        nn.Linear(65, 512),
+        nn.Linear(65, 256),
         nn.ReLU(),
-        nn.Linear(512, 32),
+        nn.Linear(256, 128),
         nn.ReLU(),
-        nn.Linear(32, 32),
+        nn.Linear(128, 64),
         nn.ReLU(),
-        nn.Linear(32, 1))
+        nn.Linear(64, 1))
 
-
-X = dataset[:, :65]
-y = dataset[:, 65:]
 # Convert to tensors
-X = torch.tensor(X, dtype=torch.float32)
-y = torch.tensor(y, dtype=torch.float32)
+X = torch.tensor(dataset[:, :65], dtype=torch.float32)
+y = torch.tensor(dataset[:, 65:], dtype=torch.float32)
 
-
+# Loss function and optimizer
 loss_fn = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
-
+# Create DataLoader
 dataset = TensorDataset(X, y)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-
+# Training loop
 for epoch in range(n_epochs):
     avg_loss = 0
-    amount = 0
     for Xbatch, ybatch in dataloader:
         y_pred = model(Xbatch)
         loss = loss_fn(y_pred, ybatch)
         avg_loss += loss.item()
-        amount += 1
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    # Print loss after each epoch
-    print(f'Finished epoch {epoch}, latest loss {str(avg_loss/amount)}')
 
+    # Print loss after each epoch
+    avg_loss /= len(dataloader)
+    print(f'Finished epoch {epoch}, latest loss: {avg_loss:.4f}')
+
+# Save the trained model
 torch.save(model, name)
-model = torch.load(name)
-model.eval()

@@ -1,25 +1,32 @@
 import csv
 import chess
-from stockfishHelper import initializeStockfish
+from tools import convertPositionToString, initializeStockfish
 import random
 import argparse
+import math
 
 # Initialize parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--amount", nargs="?",
+parser.add_argument("--amount", default=10, type=int, nargs="?",
                     help="Amount of games (Default: 10)")
-parser.add_argument("--random", nargs="?",
+parser.add_argument("--random", default=0.5, type=float, nargs="?",
                     help="Random move instead of best move (Default: 0.5)")
-parser.add_argument("--position", nargs="?",
+parser.add_argument("--name", default="minichess.csv", nargs="?",
+                    help="Name of the save (Default: minichess.csv)")
+parser.add_argument("--position", default="2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1", nargs="?",
                     help="Start position of the chess game (Default: 2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1)")
 args = parser.parse_args()
 
+# Set hyperparameters
+amount_of_games = int(args.amount)
+random_moves = float(args.random)
+name = args.name
+position = args.position
 
 # Init Stockfish parameters
+position_evaluated = []
 stockfish_white = initializeStockfish()
 stockfish_black = initializeStockfish()
-
-stockfish_eval = initializeStockfish()
 
 board = chess.Board()
 
@@ -31,50 +38,47 @@ draw_counter = 0
 def playMove(move):
     stockfish_white.make_moves_from_current_position([move])
     stockfish_black.make_moves_from_current_position([move])
-    try:
-        board.push(move)
-    except:
-        board.push_uci(move)
-    print(stockfish_black.get_board_visual())
+    board.push(chess.Move.from_uci(str(move)))
 
 
-def convertPositionToString(board):
-    piece_values = {'p': 1, 'r': 5, 'n': 3, 'b': 3, 'q': 10, 'k': 100}
-
-    lines = board.split('\n')[1:-1]
-    result = []
-    for line in lines:
-        for char in line[2:-2].split('|')[:-1]:
-            char = char.strip()
-            if char.lower() in piece_values:
-                value = piece_values[char.lower()]
-                result.append(str(value) if char.islower() else str(-value))
-            else:
-                result.append('0')
-
-    return ','.join(result)
-
-
-def createDataEntry(whitesTurn):
-    position = convertPositionToString(stockfish_black.get_board_visual())
-    turn = "1," if whitesTurn else "0,"
-    # Dataset three with cpawn value for position [limited at -10 and +10]
-    csv_path = "eval/miniChess.csv"
-    winner = getCpawnValue()
-    line = turn+position+","+str(winner)
-    try:
-        with open(csv_path, 'a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow(line.split(','))
-    except Exception as e:
-        print(f"Error: {e}")
+def createDataEntry():
+    if board.fen() not in position_evaluated:
+        position_evaluated.append(board.fen())
+        position = convertPositionToString(board)
+        print(board)
+        # Dataset three with cpawn value for position [limited at -10 and +10]
+        csv_path = name
+        winner = getCpawnValue()
+        # if (winner < 0.5 and winner > 0.1) or (winner > 0.5 and winner < 0.9):
+        line = position+","+str(winner)
+        try:
+            with open(csv_path, 'a', newline='') as csv_file:
+                csv_writer = csv.writer(csv_file)
+                csv_writer.writerow(line.split(','))
+        except Exception as e:
+            print(f"Error: {e}")
 
 
 def getCpawnValue():
+
     global draw_counter
     # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
     eval = stockfish_black.get_evaluation()
     eval_type = eval.get('type')
+    if eval_type == "mate":
+        if eval.get("value") > 0:
+            return 1
+        else:
+            return 0
+    K = 10
+    try:
+        eval_value = 1/(1+(math.pow(10, -(eval.get("value")/K))))
+    except OverflowError:
+        eval_value = 1
+    if eval_value == 0.5:
+        draw_counter += 1
+    return eval_value
+
     eval_value = round((eval.get("value") + 700)/1400*0.8+0.1, 4)
     if eval_value == 0.5:
         draw_counter += 1
@@ -94,48 +98,51 @@ def getCpawnValue():
         return eval_value
 
 
-def playGame(random_moves=0.5):
-    global draw_counter
-    draw_counter = 0
-    while stockfish_white.get_best_move():
-        # Stop Games with dead draws
-        if draw_counter > 5:
+def createRandomFen(num_moves):
+    board = chess.Board(position)
+    for i in range(num_moves):
+        if board.is_game_over():
             break
         try:
-            if random.random() < random_moves:
+            legal_moves = [move for move in board.legal_moves]
+            random_move = random.choice(legal_moves)
+            board.push(random_move)
+        except:
+            print("Couldnt make move")
+    fen_position = board.fen()
+    print(fen_position)
+    return fen_position
+
+
+def playGame(random_moves=0.5, moves=5):
+    global draw_counter
+    draw_counter = 0
+    while moves > 0 and stockfish_white.get_best_move():
+        moves -= 1
+        # Stop Games with dead draws
+        if draw_counter > 10:
+            break
+        try:
+            if random.random() > random_moves:
                 if board.turn:
-                    createDataEntry(whitesTurn=True)
-                    playMove(stockfish_white.get_best_move_time(100))
+                    createDataEntry()
+                    playMove(stockfish_white.get_best_move())
                 else:
-                    createDataEntry(whitesTurn=False)
-                    playMove(stockfish_black.get_best_move_time(100))
+                    createDataEntry()
+                    playMove(stockfish_black.get_best_move())
             else:
                 if board.turn:
-                    createDataEntry(whitesTurn=True)
+                    createDataEntry()
                     legal_moves = [move for move in board.legal_moves]
                     random_move = random.choice(legal_moves)
                     playMove(random_move)
                 else:
-                    createDataEntry(whitesTurn=False)
+                    createDataEntry()
                     legal_moves = [move for move in board.legal_moves]
                     random_move = random.choice(legal_moves)
                     playMove(random_move)
         except Exception as e:
             print(e)
-
-
-def playGameLimitedMoves(moves):
-    while moves > 0 and stockfish_white.get_best_move() and stockfish_black.get_best_move():
-        try:
-            createDataEntry(whitesTurn=True)
-            playMove(stockfish_white.get_best_move_time(100))
-            createDataEntry(whitesTurn=False)
-            playMove(stockfish_black.get_best_move_time(100))
-
-            moves -= 1
-        except Exception as e:
-            print(e)
-            moves = 0
 
 
 def setPosition(position):
@@ -144,21 +151,8 @@ def setPosition(position):
     board.set_fen(position)
 
 
-if args.amount != None:
-    amount_of_games = int(args.amount)
-else:
-    amount_of_games = 10
-
-if args.random != None:
-    random_moves = float(args.random)
-else:
-    random_moves = 0.5
-
-if args.position != None:
-    position = args.position
-else:
-    position = "2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1"
-for i in range(amount_of_games):
+for i in range(100000):
     print("Current Game: " + str(i+1))
-    setPosition(position)
-    playGame(random_moves=random_moves)
+    for x in range(5):
+        setPosition(createRandomFen(x))
+        playGame(random_moves=random_moves)

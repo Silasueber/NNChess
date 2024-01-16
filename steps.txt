@@ -1,7 +1,14 @@
-- Ordner mit sachen die wir nicht in der Presentation haben
+-> Eval Function for miniChess -> Need to experiment
+- Daten entfernen die wir nicht brauchen SPÄTER
+- Code Funktionen umlagern SPÄTER
+- Move files out of miniChess Folder SPÄTER
+- Data creation nur zulassen wenn es im bereich ist ÜBERLEGEN (nicht draws)
+
+
+CLEAN UP FILES:
+- train perfectly finish 
+
+DONE: 
+- Ordner mit sachen die wir nicht in der Presentation haben DONE
 - Eval CSV datei für minichess DONE
--> Eval Function for miniChess 
-- Daten entfernen die wir nicht brauchen 
-- Code Funktionen umlagern 
-- Spielen gegen minichess Bot 
-- Move files out of miniChess Folder 
+- Spielen gegen minichess Bot DONE
