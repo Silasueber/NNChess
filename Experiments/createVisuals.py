@@ -22,8 +22,6 @@ def create_histogram(csv_file):
     plt.show()
 
 
-create_histogram('data/nightCreation.csv')
-
 results_list = [
     {'Model': '2 Layer (32,16)', 'Learning Rate': 0.001,
         'Batch Size': 1000, 'Metric Value': -0.0710},
@@ -173,6 +171,35 @@ ax.set_xlabel('Models')
 ax.set_ylim(0, 1)
 ax.set_ylabel('R2')
 ax.set_title('Batchsize = ' + str(batch_size))
+ax.legend(title='Learning Rate', loc='upper right')
+
+# Show the plot
+plt.show()
+
+metric_v = []
+metric_v.append([59, 68, 0, 0])
+metric_v.append([40, 32, 0, 0])
+metric_v.append([1, 0, 100, 100])
+
+metric_v = np.array(metric_v)
+print(metric_v)
+X = np.arange(4)  # Use the length of models instead of a fixed value
+bar_width = 0.2
+
+fig, ax = plt.subplots()
+ax.bar(X - bar_width, metric_v[0],
+       color='b', width=bar_width, label='Win')
+ax.bar(X, metric_v[1], color='g', width=bar_width, label='Draw')
+ax.bar(X + bar_width, metric_v[2],
+       color='r', width=bar_width, label='Loss')
+
+# Set labels, title, and legend
+ax.set_xticks(X)
+ax.set_xlabel('Models')
+ax.set_xticklabels(['Random (no check)', 'Random (check)',
+                   'Elo 50 (no check)', 'Elo 50 (check)'])
+ax.set_ylabel('Frequency')
+ax.set_title('Depth = 2')
 ax.legend(title='Learning Rate', loc='upper right')
 
 # Show the plot
