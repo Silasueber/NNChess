@@ -60,9 +60,7 @@ def createDataEntry():
 
 
 def getCpawnValue():
-
     global draw_counter
-    # Be careful: the stockfish that evaluats must be always the best possbile version, if stockfish black is not the best change this line
     eval = stockfish_black.get_evaluation()
     eval_type = eval.get('type')
     if eval_type == "mate":
@@ -78,24 +76,6 @@ def getCpawnValue():
     if eval_value == 0.5:
         draw_counter += 1
     return eval_value
-
-    eval_value = round((eval.get("value") + 700)/1400*0.8+0.1, 4)
-    if eval_value == 0.5:
-        draw_counter += 1
-    if eval_value > 0.9:
-        eval_value = 0.9
-    if eval_value < 0.1:
-        eval_value = 0.1
-    if eval_type == "mate":
-        if eval.get('value') > 0:
-            return round(0.9+(0.1/eval.get("value")), 4)
-        else:
-            # Winning Black
-            if eval.get('value') == 0:
-                return round(0.1-(0.1/(-0.00001)), 4)
-            return round(0.1-(0.1/(-eval.get("value"))), 4)
-    else:
-        return eval_value
 
 
 def createRandomFen(num_moves):
@@ -124,6 +104,7 @@ def playGame(random_moves=0.5, moves=5):
             break
         try:
             if random.random() > random_moves:
+                # board.turn True if it is whites turn
                 if board.turn:
                     createDataEntry()
                     playMove(stockfish_white.get_best_move())
@@ -131,6 +112,7 @@ def playGame(random_moves=0.5, moves=5):
                     createDataEntry()
                     playMove(stockfish_black.get_best_move())
             else:
+                # board.turn True if it is whites turn
                 if board.turn:
                     createDataEntry()
                     legal_moves = [move for move in board.legal_moves]

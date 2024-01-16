@@ -1,10 +1,13 @@
 import numpy as np
+from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 import argparse
-import sys
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 # Initialize parser
 parser = argparse.ArgumentParser()
@@ -14,7 +17,7 @@ parser.add_argument("--batch", type=int, default=10,
                     help="Batch size (Default: 10)")
 parser.add_argument("--model", nargs="?",
                     help="Model name on which to train")
-parser.add_argument("--name", default="minichess_two.pt",
+parser.add_argument("--name", default="minichess.pt",
                     help="Name to save model (Default: minichess.pt)")
 parser.add_argument("--dataset", required=True,
                     help="Dataset for training")
@@ -45,33 +48,79 @@ else:
         nn.ReLU(),
         nn.Linear(64, 1))
 
+# Split dataset into train and eval
+X_train, X_eval, y_train, y_eval = train_test_split(
+    dataset[:, :65], dataset[:, 65:], test_size=0.2, random_state=42)
+
 # Convert to tensors
-X = torch.tensor(dataset[:, :65], dtype=torch.float32)
-y = torch.tensor(dataset[:, 65:], dtype=torch.float32)
+X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
+
+X_eval_tensor = torch.tensor(X_eval, dtype=torch.float32)
+y_eval_tensor = torch.tensor(y_eval, dtype=torch.float32)
 
 # Loss function and optimizer
 loss_fn = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
-# Create DataLoader
-dataset = TensorDataset(X, y)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+# Create DataLoaders for train and eval
+train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+train_dataloader = DataLoader(
+    train_dataset, batch_size=batch_size, shuffle=True)
+
+eval_dataset = TensorDataset(X_eval_tensor, y_eval_tensor)
+eval_dataloader = DataLoader(
+    eval_dataset, batch_size=batch_size, shuffle=False)
+
+# Matplot values
+train_loss_values = []
+eval_loss_values = []
 
 # Training loop
 for epoch in range(n_epochs):
-    avg_loss = 0
-    for Xbatch, ybatch in dataloader:
+    # Train
+    model.train()
+    avg_train_loss = 0
+    for Xbatch, ybatch in train_dataloader:
         y_pred = model(Xbatch)
         loss = loss_fn(y_pred, ybatch)
-        avg_loss += loss.item()
+        avg_train_loss += loss.item()
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+    avg_train_loss /= len(train_dataloader)
+    train_loss_values.append(avg_train_loss)
+
+    # Evaluate
+    model.eval()
+    avg_eval_loss = 0
+    with torch.no_grad():
+        for Xbatch, ybatch in eval_dataloader:
+            y_pred = model(Xbatch)
+            loss = loss_fn(y_pred, ybatch)
+            avg_eval_loss += loss.item()
+
+    avg_eval_loss /= len(eval_dataloader)
+    eval_loss_values.append(avg_eval_loss)
+
     # Print loss after each epoch
-    avg_loss /= len(dataloader)
-    print(f'Finished epoch {epoch}, latest loss: {avg_loss:.4f}')
+    print(
+        f'Epoch {epoch + 1}/{n_epochs}, Train Loss: {avg_train_loss:.4f}, Eval Loss: {avg_eval_loss:.4f}')
 
 # Save the trained model
 torch.save(model, name)
+
+
+xpoints = np.array([1, 8])
+ypoints = np.array([3, 10])
+
+# Plot loss curves
+plt.plot(train_loss_values, label='Train Loss')
+plt.plot(eval_loss_values, label='Eval Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()

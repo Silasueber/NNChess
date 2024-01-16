@@ -104,7 +104,7 @@ y = torch.tensor(y, dtype=torch.float32)
 k_folds = 3  # You can adjust this value
 kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
 
-for learning_rate in [0.1]:
+for learning_rate in [0.0001, 0.001, 0.1]:
     for batch_size in [1000, 100, 10]:
         for model in models:
             mse_list, mae_list, r2_list = [], [], []
