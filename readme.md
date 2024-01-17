@@ -4,7 +4,7 @@ In this project we tried to create a simple neural network, which predicts who i
 
 | Neural Network vs. Random Moves | Neural Network vs. Stockfish (Elo=200) | Reinforcement Learning agent vs random player moves |
 |:-------------------------------:|:--------------------------------------:|:----------------------------------------------------:|
-| ![Variation one](images/random.gif) | ![Variation two](images/stockfish200.gif) | ![Variation three](images/reinforcement.gif) |
+| <div style="width:250px; height:250px; text-align:center;"><img src="images/random.gif" style="max-width:100%; max-height:100%;"></div> | <div style="width:250px; height:250px; text-align:center;"><img src="images/stockfish200.gif" style="max-width:100%; max-height:100%;"></div> | <div style="width:250px; height:250px; text-align:center;"><img src="images/reinforcement.gif" style="max-width:100%; max-height:100%;"></div> |
 
 ## Disclaimer 
 This project is a University Project for the Course [Neural Networks](https://www.unisi.it/ugov/degreecourse/480727) at the [Università degli Studi di Siena](https://www.unisi.it).
