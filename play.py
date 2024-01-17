@@ -129,7 +129,7 @@ def printBoard():
     """
     Print the chess board on the console with the file names.
     """
-    print("a b c d e f g h")
+    print("\na b c d e f g h")
     print("---------------")
     print(board)
 

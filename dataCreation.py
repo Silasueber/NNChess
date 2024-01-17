@@ -9,19 +9,25 @@ import math
 parser = argparse.ArgumentParser()
 parser.add_argument("--amount", default=10, type=int, nargs="?",
                     help="Amount of games (Default: 10)")
+parser.add_argument("--depth", default=5, type=int, nargs="?",
+                    help="How many random moves to make per game (5 -> 0,1,2,3,4) (Default: 5)")
 parser.add_argument("--random", default=0.5, type=float, nargs="?",
                     help="Random move instead of best move (Default: 0.5)")
-parser.add_argument("--name", default="data/minichess/minichess.csv", nargs="?",
-                    help="Name of the save (Default: data/minichess/minichess.csv)")
+parser.add_argument("--name", required=True, nargs="?",
+                    help="Name of the file to save (with ending .csv)")
+parser.add_argument("--moves", default=5, type=int, nargs="?",
+                    help="Amount of moves to play per position (Default: 5)")
 parser.add_argument("--position", default="2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1", nargs="?",
                     help="Start position of the chess game (Default: 2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1)")
 args = parser.parse_args()
 
 # Set hyperparameters
-amount_of_games = int(args.amount)
+amount_of_games = args.amount
 random_moves = float(args.random)
 name = args.name
 position = args.position
+amount_of_moves = args.moves
+depth = args.depth
 
 # Init Stockfish parameters
 position_evaluated = []
@@ -162,6 +168,7 @@ def setPosition(position):
 # Main Loop
 for i in range(amount_of_games):
     print("Current Game: " + str(i+1))
-    for x in range(5):
+    # Create random fens, with 0 random moves, 1 random move, ...
+    for x in range(depth):
         setPosition(createRandomFen(x))
-        playGame(random_moves=random_moves)
+        playGame(random_moves=random_moves, moves=amount_of_moves)
