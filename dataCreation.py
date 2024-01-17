@@ -11,8 +11,8 @@ parser.add_argument("--amount", default=10, type=int, nargs="?",
                     help="Amount of games (Default: 10)")
 parser.add_argument("--random", default=0.5, type=float, nargs="?",
                     help="Random move instead of best move (Default: 0.5)")
-parser.add_argument("--name", default="data/minichess.csv", nargs="?",
-                    help="Name of the save (Default: data/minichess.csv)")
+parser.add_argument("--name", default="data/minichess/minichess.csv", nargs="?",
+                    help="Name of the save (Default: data/minichess/minichess.csv)")
 parser.add_argument("--position", default="2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1", nargs="?",
                     help="Start position of the chess game (Default: 2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1)")
 args = parser.parse_args()
