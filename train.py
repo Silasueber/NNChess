@@ -112,7 +112,7 @@ for epoch in range(n_epochs):
     avg_eval_loss /= len(eval_dataloader)
     if len(eval_loss_values) > 0 and avg_eval_loss < min(eval_loss_values):
         # Save checkpoint of the model
-        torch.save(model, name.split(".csv")[0]+"_checkpoint.csv")
+        torch.save(model, name.split(".pt")[0]+"_checkpoint.pt")
         checkpoint_epoch = epoch
     eval_loss_values.append(avg_eval_loss)
 
@@ -125,7 +125,7 @@ torch.save(model, name)
 
 print(f'Final eval loss {eval_loss_values[-1]}')
 print(
-    f'Checkpoint made at epoch {checkpoint_epoch} with a loss of {min(eval_loss_values)} modelname: {name.split(".csv")[0]+"_checkpoint.csv"}')
+    f'Checkpoint made at epoch {checkpoint_epoch} with a loss of {min(eval_loss_values)} modelname: {name.split(".pt")[0]+"_checkpoint.pt"}')
 
 # Plot loss curves
 plt.plot(train_loss_values, label='Train Loss')
