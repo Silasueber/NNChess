@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def initializeStockfish():
+def initializeStockfish(elo=0):
     """
     Check if a stockfish path is given in the env file and use it
 
@@ -15,7 +15,10 @@ def initializeStockfish():
     STOCKFISH_PATH = os.getenv('STOCKFISH_PATH')
     if STOCKFISH_PATH == "":
         try:
-            return Stockfish()
+            if elo > 0:
+                return Stockfish(elo)
+            else:
+                return Stockfish()
         except:
             print("Please download stockfish https://stockfishchess.org/download/ and set up the stockfish path in the .env")
             sys.exit()

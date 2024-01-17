@@ -1,11 +1,11 @@
 import chess
 import csv
 import random
-from stockfishHelper import initalizeStockfish
+from stockfishHelper import initializeStockfish
 
 # Init Stockfish parameters
-stockfish_white = initalizeStockfish()
-stockfish_black = initalizeStockfish()
+stockfish_white = initializeStockfish()
+stockfish_black = initializeStockfish()
 # stockfish_white.set_elo_rating(1000)
 # stockfish_black.set_elo_rating(1350)
 
