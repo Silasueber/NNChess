@@ -508,7 +508,7 @@ def train(epochs, batch_size, learning_rate):
     optimizer = optim.Adam(q_net.parameters(), lr=learning_rate)
     for epoch in range(epochs):
         # Every 25 epochs lower the epsilon value
-        if epoch % 5 == 0:
+        if epoch % 25 == 0:
             global epsilon
             epsilon = epsilon * 0.95  # Decay epsilon after time
         # New training data each epoch with one game and 20 turns
