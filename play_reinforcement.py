@@ -6,7 +6,7 @@ from tools import initializeStockfish
 from reinforcement import transformSingleBoardToOneHot, get_highest_legal_q_value_from_predictions
 # Initialize parser
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", default="reinforcement_trained_with_few_examples.pt", nargs="?",
+parser.add_argument("--model", default="reinforcement.pt", nargs="?",
                     help="Which model to play against (default: reinforcment.pt)")
 parser.add_argument("--turns", default=20, type=int, nargs="?",
                     help="How many turns should they each play? (default 20 each)")
