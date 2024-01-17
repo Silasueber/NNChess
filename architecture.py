@@ -112,7 +112,7 @@ def mae(value, expected):
 
 
 # K-fold cross-validation
-kl = k_fold(X, 3)
+kl = k_fold(X, k_folds)
 
 
 for learning_rate in [0.001, 0.001, 0.1]:

@@ -43,9 +43,7 @@ except Exception as e:
 
 
 # Initialize Stockfish
-stockfish = initializeStockfish()
-# Set Stockfish elo rating
-stockfish.set_elo_rating(elo_rating)
+stockfish = initializeStockfish(elo_rating)
 
 # Initialize chess board
 initial_fen = "2rnkr2/2pppp2/8/8/8/8/2PPPP2/2RNKR2 w - - 0 1"
@@ -78,7 +76,7 @@ def evalPosition():
 
 def maximum(depth):
     """
-    Get the maximum Value possibible for all the moves
+    Get the maximum Value possible for all the moves
 
     :param1 depth: the current depth of the minimax algorithm
     :return: the best move and the maximum value

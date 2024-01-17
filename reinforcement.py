@@ -507,7 +507,7 @@ def train(epochs, batch_size, learning_rate):
     loss_fn = nn.MSELoss()
     optimizer = optim.Adam(q_net.parameters(), lr=learning_rate)
     for epoch in range(epochs):
-        # Every 5 epochs lower the epsilon value
+        # Every 25 epochs lower the epsilon value
         if epoch % 5 == 0:
             global epsilon
             epsilon = epsilon * 0.95  # Decay epsilon after time
@@ -541,7 +541,7 @@ def train(epochs, batch_size, learning_rate):
         print(f'Finished epoch {epoch}, latest loss {loss}')
 
         # copy Q-Network to target network after some epochs
-        if epoch % 10 == 0:
+        if epoch % 25 == 0:
             target_net = copy.deepcopy(q_net)
     # save model
     torch.save(q_net, model_name)
