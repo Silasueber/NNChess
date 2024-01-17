@@ -5,3 +5,4 @@ test.py
 data/p2_one_hot_encoded.npy
 /miniChess/data/*
 /miniChess/virtualenv/
+__pycache__/*
