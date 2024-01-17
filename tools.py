@@ -13,12 +13,9 @@ def initializeStockfish(elo=0):
     # load the enviroment variables
     load_dotenv()
     STOCKFISH_PATH = os.getenv('STOCKFISH_PATH')
-    if STOCKFISH_PATH == "":
+    if STOCKFISH_PATH == None or STOCKFISH_PATH == "":
         try:
-            if elo > 0:
-                return Stockfish(elo)
-            else:
-                return Stockfish()
+            return Stockfish()
         except:
             print("Please download stockfish https://stockfishchess.org/download/ and set up the stockfish path in the .env")
             sys.exit()
