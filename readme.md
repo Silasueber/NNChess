@@ -30,7 +30,7 @@ python dataCreation.py --amount=10 --random=0.5 --name=data/minichess/minichess.
 After creating the data you can train the model with the train.py file.
 
 ```
-python train.py --epoch=5 --batch=10 --dataset=data/minichess/miniChess.csv --name=models/minichess/minichess.pt --lr=0.001
+python train.py --epoch=100 --batch=10 --dataset=data/minichess/miniChess.csv --name=models/minichess/minichess.pt --lr=0.001
 ```
 
 The final step is now to play against the trained model, or let the trained model play against a bot.
