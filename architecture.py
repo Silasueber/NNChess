@@ -3,8 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import r2_score
 import argparse
 
 # Initialize parser
@@ -68,18 +67,64 @@ X = torch.tensor(X, dtype=torch.float32)
 y = torch.tensor(y, dtype=torch.float32)
 
 
-# K-fold cross-validation
-kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
+def k_fold(dataset, k):
+    """
+    Convert the dataset into k folds for cross-validation.
 
-for learning_rate in [0.0001, 0.001, 0.1]:
+    :param1 dataset: The dataset
+    :param2 k: Number of folds
+
+    :return: array of dataset split into k-fold
+    """
+    fold_size = len(dataset) // k
+    indices = np.arange(len(dataset))
+    folds = []
+    for i in range(k):
+        test_indices = indices[i * fold_size: (i + 1) * fold_size]
+        train_indices = np.concatenate(
+            [indices[:i * fold_size], indices[(i + 1) * fold_size:]])
+        folds.append((train_indices, test_indices))
+    return folds
+
+
+def mse(value, expected):
+    """
+    Calculates the mean square error of the value and the expected values
+
+    :param1 value: the output value of the model
+    :param2 expected: the expected value
+
+    :return: the MSE
+    """
+    return (np.square(value - expected)).mean(axis=0)[0]
+
+
+def mae(value, expected):
+    """
+    Calculates the mean absolute error of the value and the expected values
+
+    :param1 value: the output value of the model
+    :param2 expected: the expected value
+
+    :return: the MAE
+    """
+    return np.abs(value - expected).mean(axis=0)[0]
+
+
+# K-fold cross-validation
+kl = k_fold(X, 3)
+
+
+for learning_rate in [0.001, 0.001, 0.1]:
     for batch_size in [1000, 100, 10]:
         for model in models:
             mse_list, mae_list, r2_list = [], [], []
             loss_fn = nn.MSELoss()
             optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-            for fold, (train_index, val_index) in enumerate(kf.split(X)):
-                print(f"Fold {fold + 1}/{k_folds}")
-
+            for i in range(len(kl)):
+                train_index = kl[i][0]
+                val_index = kl[i][1]
+                print(f"Fold {i + 1}/{k_folds}")
                 X_train, X_val = X[train_index], X[val_index]
                 y_train, y_val = y[train_index], y[val_index]
 
@@ -112,16 +157,15 @@ for learning_rate in [0.0001, 0.001, 0.1]:
                     y_val_pred = model(X_val)
 
                     # Regression metrics
-                    mse = mean_squared_error(y_val, y_val_pred)
-                    mae = mean_absolute_error(y_val, y_val_pred)
+                    mse_fold = mse(np.array(y_val), np.array(y_val_pred))
+                    mae_fold = mae(np.array(y_val), np.array(y_val_pred))
                     r2 = r2_score(y_val, y_val_pred)
 
-                    mse_list.append(mse)
-                    mae_list.append(mae)
+                    mse_list.append(mse_fold)
+                    mae_list.append(mae_fold)
                     r2_list.append(r2)
-
                     print(
-                        f"Fold {fold + 1} Metrics - MSE: {mse:.4f}, MAE: {mae:.4f}, R2: {r2:.4f}")
+                        f"Fold {i + 1} Metrics - MSE: {mse_fold:.4f}, MAE: {mae_fold:.4f}, R2: {r2:.4f}")
 
             # Print average metrics across folds
             print(f"\nAverage Metrics Across {k_folds} Folds:")
