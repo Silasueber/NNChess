@@ -6,7 +6,7 @@ import chess
 import time
 from torch.utils.data import TensorDataset, DataLoader
 # load the dataset, split into input (X) and output (y) variables
-# BE CAREFUL the split must be changed if we use a different representation of who is winning cpawn vs, [1,0] 
+# BE CAREFUL the split must be changed if we use a different representation of who is winning cpawn vs, [1,0]
 
 train = False
 if train:
@@ -27,7 +27,7 @@ if train:
         nn.ReLU(),
         nn.Linear(32, 1))
 
-    # load model: 
+    # load model:
     model = torch.load("models/018_loss.pt")
 
     loss_fn = nn.MSELoss()  # BECAUSE ALL LABELS ARE EITHER 0 OR 1
@@ -61,12 +61,13 @@ else:
 whiteWinning = "3k4/8/3K4/8/8/8/8/Q7 w - - 0 2"
 blackWinning = "8/2k5/8/2q5/8/8/7R/7K w - - 0 1"
 
+
 def convertPositionToString(fen):
     piece_values = {'p': 1, 'r': 5, 'n': 3, 'b': 3, 'q': 10, 'k': 1000}
     board = chess.Board(fen)
     board = str(board)
     lines = board.split('\n')
-   
+
     result = []
     for line in lines:
         for char in line.split(' '):
@@ -79,12 +80,14 @@ def convertPositionToString(fen):
 
     return ','.join(result)
 
+
 def testFenPosition(fen):
-    test = ("1,"+ convertPositionToString(fen)).split(",")
+    test = ("1," + convertPositionToString(fen)).split(",")
     test = [int(t) for t in test]
     test = torch.tensor(test, dtype=torch.float32)
     predictions = model(test)
     print(predictions)
+
 
 testFenPosition(whiteWinning)
 testFenPosition(blackWinning)
