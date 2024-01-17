@@ -54,7 +54,10 @@ stockfish.set_fen_position(initial_fen)
 game = chess.pgn.Game()
 game.headers["FEN"] = initial_fen
 game.headers["White"] = "Neural Network Bot"
-game.headers["Black"] = f"Stockfish {elo_rating}"
+if not random_moves:
+    game.headers["Black"] = f"Stockfish {elo_rating}"
+else:
+    game.headers["Black"] = "Random Moves"
 
 
 def evalPosition():
@@ -129,7 +132,7 @@ def printBoard():
     """
     Print the chess board on the console with the file names.
     """
-    print("a b c d e f g h")
+    print("\na b c d e f g h")
     print("---------------")
     print(board)
 

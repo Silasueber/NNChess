@@ -24,7 +24,7 @@ pip install -r requirements.txt
 To start creating your own data you can execute the dataCreation.py file.
 
 ```
-python dataCreation.py --amount=10 --random=0.5
+python dataCreation.py --amount=10 --random=0.5 --name=data/minichess/minichess.csv
 ```
 
 After creating the data you can train the model with the train.py file.

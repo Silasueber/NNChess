@@ -13,10 +13,12 @@ def initializeStockfish(elo=0):
     # load the enviroment variables
     load_dotenv()
     STOCKFISH_PATH = os.getenv('STOCKFISH_PATH')
-    if STOCKFISH_PATH == "":
+    if STOCKFISH_PATH == None or STOCKFISH_PATH == "":
         try:
             if elo > 0:
-                return Stockfish(elo)
+                stockfish = Stockfish()
+                stockfish.set_elo_rating(elo)
+                return stockfish
             else:
                 return Stockfish()
         except:
