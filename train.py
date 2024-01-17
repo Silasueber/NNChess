@@ -17,8 +17,8 @@ parser.add_argument("--batch", type=int, default=10,
                     help="Batch size (Default: 10)")
 parser.add_argument("--model", nargs="?",
                     help="Model name on which to train")
-parser.add_argument("--name", default="minichess.pt",
-                    help="Name to save model (Default: minichess.pt)")
+parser.add_argument("--name", default="models/minichess/minichess.pt",
+                    help="Name to save model (Default: models/minichess/minichess.pt)")
 parser.add_argument("--dataset", required=True,
                     help="Dataset for training")
 parser.add_argument("--lr", type=float, default=0.001,
